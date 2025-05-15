@@ -117,20 +117,4 @@ class InMemoryUserRepositoryTest {
         assertTrue(repository.existsById(createdUser.getId()));
     }
 
-    /*@Test
-    void update_shouldNotAffectOtherUsers() {
-        final User user1 = repository.create(testUser);
-        final User user2 = repository.create(new User(null, "Jane", "jane", "jane@example.com", LocalDate.now()));
-        final User updatedUser = new User(user1.getId(), "Updated Name", user1.getLogin(), user1.getEmail(), user1.getBirthday());
-
-        repository.update(updatedUser);
-
-        List<User> users = repository.findAll();
-
-        assertAll("Update user",
-                () -> assertEquals(2, users.size()),
-                () -> assertEquals("Updated Name", users.get(0).getName()),
-                () -> assertEquals("Jane", users.get(1).getName())
-        );
-    }*/
 }
