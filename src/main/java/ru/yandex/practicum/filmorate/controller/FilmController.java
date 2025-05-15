@@ -30,29 +30,37 @@ public class FilmController {
     @GetMapping
     public Collection<Film> getList() {
         log.debug("Getting films list");
+
         return service.getList();
     }
 
     @PostMapping
     public ResponseEntity<Film> create(@RequestBody @Valid Film film, HttpServletResponse response) {
         log.info("Creating film: {}", film);
+
         if (film.getId() != null) {
             response.addHeader("Warning", "Server ignored client-provided ID");
         }
         Film createdFilm = service.create(film);
+
         log.debug("Successfully created film ID: {}", film.getId());
+
         return ResponseEntity.status(HttpStatus.CREATED).body(createdFilm);
     }
 
     @PutMapping
     public Film update(@RequestBody @Valid Film film) {
         log.info("Updating film: {}", film);
+
         try {
             Film updatedFilm = service.update(film);
+
             log.debug("Successfully updated film ID: {}", film.getId());
+
             return updatedFilm;
         } catch (FilmNotFoundException e) {
             log.warn("Attempt to update non-existent film ID: {}", film.getId());
+
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Film not found", e);
         }
     }

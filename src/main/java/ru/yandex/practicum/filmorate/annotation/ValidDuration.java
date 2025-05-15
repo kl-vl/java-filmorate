@@ -16,7 +16,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidDuration {
     String message() default "Invalid duration";
+
     long minMinutes() default 1;
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

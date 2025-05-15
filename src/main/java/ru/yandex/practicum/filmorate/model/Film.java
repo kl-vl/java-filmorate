@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,7 +41,7 @@ public class Film {
     private LocalDate releaseDate;
 
     @NotNull
-    @ValidDuration(minMinutes = 1, message = "Duration must be positive")
+    @ValidDuration(message = "Duration must be positive")
     @JsonSerialize(using = DurationMinutesConverter.Serializer.class)
     @JsonDeserialize(using = DurationMinutesConverter.Deserializer.class)
     private Duration duration;

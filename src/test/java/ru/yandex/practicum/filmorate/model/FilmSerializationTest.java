@@ -27,13 +27,8 @@ class FilmSerializationTest {
 
     @Test
     void testSerializeDurationToMinutes() throws JsonProcessingException {
-        final Film film = new Film(
-                1,
-                "Inception",
-                "A thief who steals corporate secrets",
-                LocalDate.of(2010, 7, 16),
-                Duration.ofMinutes(148)
-        );
+        final Film film = new Film(1, "Inception", "A thief who steals corporate secrets",
+                LocalDate.of(2010, 7, 16), Duration.ofMinutes(148));
 
         final String json = mapper.writeValueAsString(film);
 
@@ -81,13 +76,7 @@ class FilmSerializationTest {
 
     @Test
     void testSerializeWithNullReleaseDate() throws JsonProcessingException {
-        final Film film = new Film(
-                1,
-                "Inception",
-                "A thief who steals corporate secrets",
-                null,
-                Duration.ofMinutes(148)
-        );
+        final Film film = new Film(1, "Inception", "A thief who steals corporate secrets", null, Duration.ofMinutes(148));
 
         final String json = mapper.writeValueAsString(film);
 
