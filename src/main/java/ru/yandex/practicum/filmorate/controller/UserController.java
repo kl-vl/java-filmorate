@@ -4,8 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,35 +25,21 @@ public class UserController {
 
     @GetMapping
     public Collection<User> getList() {
-        log.debug("Getting users list");
-
         return service.getList();
     }
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody @Valid User user, HttpServletResponse response) {
-        log.info("Creating user: {}", user);
-
+    public User create(@RequestBody @Valid User user, HttpServletResponse response) {
         if (user.getId() != null) {
             response.addHeader("Warning", "Server ignored client-provided ID");
         }
 
-        User createdUser = service.create(user);
-
-        log.debug("Successfully created user ID: {}", user.getId());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+        return service.create(user);
     }
 
     @PutMapping
     public User update(@RequestBody @Valid User user) {
-        log.info("Updating user: {}", user);
-
-        User updatedUser = service.update(user);
-
-        log.debug("Successfully updated user ID: {}", user.getId());
-
-        return updatedUser;
+        return service.update(user);
     }
 
 }

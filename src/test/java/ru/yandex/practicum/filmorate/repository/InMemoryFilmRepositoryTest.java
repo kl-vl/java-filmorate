@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.exception.IllegalEntityException;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.IllegalFilmException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.Duration;
@@ -42,7 +42,7 @@ class InMemoryFilmRepositoryTest {
     void create_shouldThrowWhenIdExists() {
         testFilm.setId(1);
 
-        assertThrows(IllegalEntityException.class, () -> repository.create(testFilm));
+        assertThrows(IllegalFilmException.class, () -> repository.create(testFilm));
     }
 
     @Test
@@ -61,7 +61,7 @@ class InMemoryFilmRepositoryTest {
 
     @Test
     void update_shouldThrowWhenFilmNotExists() {
-        assertThrows(EntityNotFoundException.class, () ->
+        assertThrows(FilmNotFoundException.class, () ->
                 repository.update(new Film(999, "Test", "Desc", LocalDate.now(), Duration.ofMinutes(90))));
     }
 

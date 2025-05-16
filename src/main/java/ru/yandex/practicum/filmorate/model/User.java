@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 
@@ -41,6 +42,6 @@ public class User {
      * Terms of reference: The name for display can be empty - in this case, the login will be used
      */
     public String getName() {
-        return (this.name == null || this.name.isBlank()) ? this.login : this.name;
+        return StringUtils.hasText(name) ? this.name: this.login;
     }
 }
