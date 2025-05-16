@@ -40,8 +40,9 @@ class FilmSerializationTest {
 
     @Test
     void testDeserializeMinutesToDuration() throws JsonProcessingException {
-        final String json = """
-                { "id": 1,
+        @SuppressWarnings("checkstyle:RegexpSinglelineJava") final String json = """
+                {
+                   "id": 1,
                    "name": "Inception",
                    "description": "Description",
                    "releaseDate": "2010-07-16",
@@ -59,11 +60,13 @@ class FilmSerializationTest {
 
     @Test
     void testDeserializeWithoutReleaseDate_shouldSetNull() throws JsonProcessingException {
+        @SuppressWarnings("checkstyle:RegexpSinglelineJava")
         final String json = """
-                { "id": 1,
-                  "name": "Inception",
-                  "description": "Description",
-                  "duration": 120
+                {
+                    "id": 1,
+                    "name": "Inception",
+                    "description": "Description",
+                    "duration": 120
                 }
                 """;
 
@@ -83,12 +86,14 @@ class FilmSerializationTest {
 
     @Test
     void testDeserializeInvalidDateFormat_shouldThrowException() {
+        @SuppressWarnings("checkstyle:RegexpSinglelineJava")
         final String json = """
-                { "id": 1,
-                  "name": "Inception",
-                  "description": "Description",
-                  "releaseDate": "16-07-2010", // Неправильный формат
-                  "duration": 120
+                {
+                    "id": 1,
+                    "name": "Inception",
+                    "description": "Description",
+                    "releaseDate": "16-07-2010", // Неправильный формат
+                    "duration": 120
                 }
                 """;
 

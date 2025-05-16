@@ -39,12 +39,14 @@ public class UserSerializationTest {
 
     @Test
     void deserializeJson_shouldCreateValidUser() throws JsonProcessingException {
+        @SuppressWarnings("checkstyle:RegexpSinglelineJava")
         final String json = """
-                { "id": 1,
-                  "name": "John Doe",
-                  "login": "johndoe",
-                  "email": "john@example.com",
-                  "birthday": "1990-05-15"
+                {
+                    "id": 1,
+                    "name": "John Doe",
+                    "login": "johndoe",
+                    "email": "john@example.com",
+                    "birthday": "1990-05-15"
                 }
                 """;
 
@@ -61,11 +63,13 @@ public class UserSerializationTest {
 
     @Test
     void deserializeJsonWithoutName_shouldUseLogin() throws JsonProcessingException {
+        @SuppressWarnings("checkstyle:RegexpSinglelineJava")
         final String json = """
-                { "id": 1,
-                  "login": "johndoe",
-                  "email": "john@example.com",
-                  "birthday": "1990-05-15"
+                {
+                    "id": 1,
+                    "login": "johndoe",
+                    "email": "john@example.com",
+                    "birthday": "1990-05-15"
                 }
                 """;
 
@@ -76,9 +80,11 @@ public class UserSerializationTest {
 
     @Test
     void deserializeMinimalUser_shouldWork() throws JsonProcessingException {
+        @SuppressWarnings("checkstyle:RegexpSinglelineJava")
         final String json = """
-                { "login": "johndoe",
-                  "birthday": "1990-05-15"
+                {
+                    "login": "johndoe",
+                    "birthday": "1990-05-15"
                 }
                 """;
 
@@ -93,12 +99,14 @@ public class UserSerializationTest {
 
     @Test
     void deserializeJsonWithNullEmail_shouldWork() throws JsonProcessingException {
+        @SuppressWarnings("checkstyle:RegexpSinglelineJava")
         final String json = """
-                { "id": 1,
-                  "name": "John Doe",
-                  "login": "johndoe",
-                  "email": null,
-                  "birthday": "1990-05-15"
+                {
+                    "id": 1,
+                    "name": "John Doe",
+                    "login": "johndoe",
+                    "email": null,
+                    "birthday": "1990-05-15"
                 }
                 """;
 
