@@ -42,6 +42,6 @@ public class User {
      * Terms of reference: The name for display can be empty - in this case, the login will be used
      */
     public String getName() {
-        return StringUtils.hasText(name) ? this.name: this.login;
+        return StringUtils.hasText(name) ? this.name : this.login;
     }
 }
