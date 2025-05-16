@@ -74,12 +74,10 @@ public class UserSerializationTest {
 
     @Test
     void deserializeMinimalUser_shouldWork() throws JsonProcessingException {
-        final String json = """
-                {
-                    "login": "johndoe",
-                    "birthday": "1990-05-15"
-                }
-                """;
+        final String json = "{"
+                + "    \"login\": \"johndoe\","
+                + "    \"birthday\": \"1990-05-15\""
+                + "}";
 
         final User user = mapper.readValue(json, User.class);
 
