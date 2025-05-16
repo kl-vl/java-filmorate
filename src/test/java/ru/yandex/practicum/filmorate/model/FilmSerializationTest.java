@@ -40,15 +40,13 @@ class FilmSerializationTest {
 
     @Test
     void testDeserializeMinutesToDuration() throws JsonProcessingException {
-        @SuppressWarnings("checkstyle:RegexpSinglelineJava") final String json = """
-                {
-                   "id": 1,
-                   "name": "Inception",
-                   "description": "Description",
-                   "releaseDate": "2010-07-16",
-                   "duration": 120
-                }
-                """;
+        final String json = "{"
+                + "   \"id\": 1,"
+                + "   \"name\": \"Inception\","
+                + "   \"description\": \"Description\","
+                + "   \"releaseDate\": \"2010-07-16\","
+                + "   \"duration\": 120"
+                + "}";
 
         final Film film = mapper.readValue(json, Film.class);
 
@@ -60,15 +58,12 @@ class FilmSerializationTest {
 
     @Test
     void testDeserializeWithoutReleaseDate_shouldSetNull() throws JsonProcessingException {
-        @SuppressWarnings("checkstyle:RegexpSinglelineJava")
-        final String json = """
-                {
-                    "id": 1,
-                    "name": "Inception",
-                    "description": "Description",
-                    "duration": 120
-                }
-                """;
+        final String json = "{"
+                + "    \"id\": 1,"
+                + "    \"name\": \"Inception\","
+                + "    \"description\": \"Description\","
+                + "    \"duration\": 120"
+                + "}";
 
         final Film film = mapper.readValue(json, Film.class);
 
@@ -86,16 +81,13 @@ class FilmSerializationTest {
 
     @Test
     void testDeserializeInvalidDateFormat_shouldThrowException() {
-        @SuppressWarnings("checkstyle:RegexpSinglelineJava")
-        final String json = """
-                {
-                    "id": 1,
-                    "name": "Inception",
-                    "description": "Description",
-                    "releaseDate": "16-07-2010", // Неправильный формат
-                    "duration": 120
-                }
-                """;
+        final String json = "{"
+                + "    \"id\": 1,"
+                + "    \"name\": \"Inception\","
+                + "    \"description\": \"Description\","
+                + "    \"releaseDate\": \"16-07-2010\","
+                + "    \"duration\": 120"
+                + "}";
 
         assertThrows(JsonProcessingException.class, () -> {
             mapper.readValue(json, Film.class);
