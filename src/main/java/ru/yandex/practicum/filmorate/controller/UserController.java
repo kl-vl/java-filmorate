@@ -10,34 +10,36 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
 
 @Slf4j
 @RestController
-@RequestMapping("/films")
+@RequestMapping("/users")
 @RequiredArgsConstructor
-public class FilmController {
+public class UserController {
 
-    private final FilmService service;
+    private final UserService service;
 
     @GetMapping
-    public Collection<Film> getList() {
+    public Collection<User> getList() {
         return service.getList();
     }
 
     @PostMapping
-    public Film create(@RequestBody @Valid Film film, HttpServletResponse response) {
-        if (film.getId() != null) {
+    public User create(@RequestBody @Valid User user, HttpServletResponse response) {
+        if (user.getId() != null) {
             response.addHeader("Warning", "Server ignored client-provided ID");
         }
-        return service.create(film);
+
+        return service.create(user);
     }
 
     @PutMapping
-    public Film update(@RequestBody @Valid Film film) {
-        return service.update(film);
+    public User update(@RequestBody @Valid User user) {
+        return service.update(user);
     }
+
 }
