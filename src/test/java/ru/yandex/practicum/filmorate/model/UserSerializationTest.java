@@ -69,7 +69,7 @@ public class UserSerializationTest {
 
         final User user = mapper.readValue(json, User.class);
 
-        assertEquals("johndoe", user.getName()); // Проверка автоматической подстановки login
+        assertEquals("johndoe", user.getName());
     }
 
     @Test

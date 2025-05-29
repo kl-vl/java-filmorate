@@ -11,8 +11,12 @@ Simple service with REST API, works with films and user ratings, as well as retu
 - Adding a film
 - Updating a film
 - Retrieving all films
+- Like films
+- Popular films list
 
 ## User
 - Creating a user
 - Updating a user
 - Retrieving a list of all users
+- Add friends
+- Get common friends

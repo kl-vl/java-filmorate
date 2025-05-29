@@ -16,12 +16,13 @@ public class FilmService {
     private final FilmRepository repository;
 
     public Film create(Film film) {
-        log.debug("Creating Film: {}", film);
+        log.info("Creating Film with name: {}", film.getName());
 
         film.setId(null);
         Film createdFilm = repository.create(film);
 
-        log.debug("Successfully created Film with ID: {}", createdFilm.getId());
+        log.info("Film created successfully. ID : {}", film.getId());
+        log.debug("Film created data: {}", createdFilm);
 
         return createdFilm;
     }
@@ -33,16 +34,16 @@ public class FilmService {
     }
 
     public Film update(Film film) throws FilmNotFoundException {
-        log.debug("Updating Film with ID: {}", film.getId());
+        log.info("Updating Film with ID: {}", film.getId());
 
         if (!repository.existsById(film.getId())) {
-            log.debug("Film with {} not found", film.getId());
             throw new FilmNotFoundException("The Film with %s not found".formatted(film.getId()));
         }
 
         Film updatedFilm = repository.update(film);
 
-        log.debug("Successfully updated film: {}", updatedFilm);
+        log.info("Film updated successfully. ID : {}", updatedFilm.getId());
+        log.debug("Film updated data: {}", updatedFilm);
 
         return updatedFilm;
     }
