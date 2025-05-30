@@ -41,7 +41,7 @@ public class InMemoryFilmRepository implements FilmRepository {
         if (film.getId() == null) {
             throw new FilmValidationException("Film ID must be provided for update");
         }
-        if (!films.containsKey(film.getId())) {
+        if (!existsById(film.getId())) {
             throw new FilmNotFoundException("The Film with ID=%s not found".formatted(film.getId()));
         }
         films.put(film.getId(), film);

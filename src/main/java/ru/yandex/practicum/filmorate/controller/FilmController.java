@@ -31,8 +31,9 @@ public class FilmController {
     private final FilmService filmService;
     private final FilmLikeService likeService;
 
-    public record LikeResponse(Integer filmId, Integer userId, String status) {
-    }
+    // TODO
+    //public record LikeResponse(Integer filmId, Integer userId, String status) {
+    //}
 
     @GetMapping
     public Collection<Film> getList() {
@@ -53,9 +54,8 @@ public class FilmController {
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public LikeResponse addLike(@PathVariable int filmId, @PathVariable int userId) {
-        likeService.addLike(filmId, userId);
-        return new FilmController.LikeResponse(filmId, userId, "FRIENDS");
+    public boolean addLike(@PathVariable int filmId, @PathVariable int userId) {
+        return likeService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")

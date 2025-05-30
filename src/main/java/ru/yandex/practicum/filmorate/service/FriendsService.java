@@ -24,13 +24,11 @@ public class FriendsService {
             throw new IllegalStateException("User cannot add themselves as a friend");
         }
 
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User with ID " + userId + " not found");
-        }
+        User user = userRepository.get(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
 
-        if (!userRepository.existsById(friendId)) {
-            throw new UserNotFoundException("User with id " + friendId + " not found");
-        }
+        User friend = userRepository.get(friendId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + friendId + " not found"));
 
         if (userRepository.areFriends(userId, friendId)) {
             throw new IllegalStateException("Users are already friends");
@@ -46,15 +44,13 @@ public class FriendsService {
             throw new IllegalStateException("User cannot delete themselves from friend");
         }
 
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User with ID " + userId + " not found");
-        }
+        User user = userRepository.get(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
 
-        if (!userRepository.existsById(friendId)) {
-            throw new UserNotFoundException("User with ID " + friendId + " not found");
-        }
+        User friend = userRepository.get(friendId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + friendId + " not found"));
 
-        if (!userRepository.areFriends(userId, friendId)) {
+        if (!userRepository.areFriends(user.getId(), friend.getId())) {
             return true;
         }
 
@@ -64,11 +60,10 @@ public class FriendsService {
     }
 
     public List<User> getFriends(Integer userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User with id " + userId + " not found");
-        }
+        User user = userRepository.get(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
 
-        return userRepository.getFriends(userId).stream()
+        return userRepository.getFriends(user.getId()).stream()
                 .map(userRepository::getById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -79,16 +74,12 @@ public class FriendsService {
         if (userId.equals(otherId)) {
             return Collections.emptyList();
         }
+        User user = userRepository.get(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
+        User otherUser = userRepository.get(otherId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + otherId + " not found"));
 
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User with id " + userId + " not found");
-        }
-
-        if (!userRepository.existsById(otherId)) {
-            throw new UserNotFoundException("User with id " + otherId + " not found");
-        }
-
-        return userRepository.getCommonFriends(userId, otherId).stream()
+        return userRepository.getCommonFriends(user.getId(), otherUser.getId()).stream()
                 .map(userRepository::getById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)

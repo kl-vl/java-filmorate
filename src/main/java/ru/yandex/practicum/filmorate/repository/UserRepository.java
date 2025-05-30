@@ -28,5 +28,5 @@ public interface UserRepository {
 
     boolean areFriends(Integer userId, Integer friendId);
 
-
+    Optional<User> get(Integer id);
 }

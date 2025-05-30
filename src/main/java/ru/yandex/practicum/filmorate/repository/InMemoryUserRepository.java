@@ -101,5 +101,9 @@ public class InMemoryUserRepository implements UserRepository {
         return friendsStorage.getOrDefault(userId, Collections.emptySet()).contains(friendId);
     }
 
+    @Override
+    public Optional<User> get(Integer id) {
+        return Optional.ofNullable(users.get(id));
+    }
 
 }
