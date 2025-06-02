@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -47,13 +48,18 @@ class UserValidationTest {
 
     @Test
     void blankLogin_shouldFailValidation() {
-        final User user = new User(1, "John", "", "john@example.com", LocalDate.now());
+        final User user = new User(1, "John", " ", "john@example.com", LocalDate.now());
+
+        final List<String> expectedMessages = List.of("must not be blank", "ust not contain whitespace");
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
         assertAll("Blank login",
-                () -> assertEquals(1, violations.size()),
-                () -> assertEquals("must not be blank", violations.iterator().next().getMessage())
+                () -> assertEquals(2, violations.size()),
+                () -> assertTrue(expectedMessages.stream()
+                        .allMatch(expected -> violations.stream()
+                                .map(ConstraintViolation::getMessage)
+                                .anyMatch(actual -> actual.contains(expected))))
         );
     }
 
@@ -148,11 +154,11 @@ class UserValidationTest {
         assertAll("All validation errors",
                 () -> assertEquals(5, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("User ID must be positive number"))),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("must not be blank"))),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("Login must not be blank"))),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("must not be null"))),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("Not valid email format"))),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("must be a date in the past or in the present")))
-        );
+                );
     }
 
 }

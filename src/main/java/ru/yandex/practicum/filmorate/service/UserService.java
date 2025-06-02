@@ -16,12 +16,13 @@ public class UserService {
     private final UserRepository repository;
 
     public User create(User user) {
-        log.debug("Creating user: {}", user);
+        log.debug("Creating user wil Login: {}", user.getLogin());
 
         user.setId(null);
         User createdUser = repository.create(user);
 
-        log.debug("Successfully created User with ID: {}", createdUser.getId());
+        log.info("Successfully created User with ID: {}", createdUser.getId());
+        log.debug("User created data: {}", createdUser);
 
         return createdUser;
     }
@@ -33,14 +34,15 @@ public class UserService {
     }
 
     public User update(User user) {
-        log.debug("Updating user with ID: {}", user.getId());
+        log.info("Updating user with ID: {}", user.getId());
 
         if (!repository.existsById(user.getId())) {
-            throw new UserNotFoundException("The User with %s does not exists".formatted(user.getId()));
+            throw new UserNotFoundException("The User with ID %s does not exists".formatted(user.getId()));
         }
         User updatedUser = repository.update(user);
 
-        log.debug("Successfully updated User: {}", updatedUser);
+        log.info("User updated successfully. ID : {}", updatedUser.getId());
+        log.debug("User updated data: {}", updatedUser);
 
         return updatedUser;
     }
