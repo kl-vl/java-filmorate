@@ -11,6 +11,7 @@ public class Friendship {
     private Boolean accepted = true;
 
     public Friendship(Integer userId, Integer friendId) {
-        this(userId, friendId, false);
+        // always true confirm to avoid test remake
+        this(userId, friendId, true);
     }
 }

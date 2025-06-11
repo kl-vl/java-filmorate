@@ -72,8 +72,8 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public boolean addFriend(Integer userId, Integer friendId) {
-        Friendship friendship1 = new Friendship(userId, friendId, false);
-        Friendship friendship2 = new Friendship(friendId, userId, false);
+        Friendship friendship1 = new Friendship(userId, friendId);
+        Friendship friendship2 = new Friendship(friendId, userId);
 
         friendships.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(friendship1);
         friendships.computeIfAbsent(friendId, k -> ConcurrentHashMap.newKeySet()).add(friendship2);

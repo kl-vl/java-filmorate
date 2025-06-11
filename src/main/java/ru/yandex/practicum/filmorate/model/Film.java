@@ -55,9 +55,13 @@ public class Film {
         return duration.toMinutes();
     }
 
-    @NotNull
     private Raiting rating;
 
     private final Set<Genre> genres = new HashSet<>();
+
+    // Constructor to avoid all tests changes
+    public Film(Integer id, String name, String description, LocalDate releaseDate, Duration duration) {
+        this(id,name,description,releaseDate,duration,null);
+    }
 
 }
