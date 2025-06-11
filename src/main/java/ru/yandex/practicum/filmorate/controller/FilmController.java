@@ -31,10 +31,6 @@ public class FilmController {
     private final FilmService filmService;
     private final FilmLikeService likeService;
 
-    // TODO
-    //public record LikeResponse(Integer filmId, Integer userId, String status) {
-    //}
-
     @GetMapping
     public Collection<Film> getList() {
         return filmService.getList();
