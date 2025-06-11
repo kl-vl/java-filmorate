@@ -18,6 +18,8 @@ import ru.yandex.practicum.filmorate.converter.DurationMinutesConverter;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Film.
@@ -52,5 +54,10 @@ public class Film {
     private long getDurationMinutes() {
         return duration.toMinutes();
     }
+
+    @NotNull
+    private Raiting rating;
+
+    private final Set<Genre> genres = new HashSet<>();
 
 }
