@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -18,18 +19,19 @@ import ru.yandex.practicum.filmorate.converter.DurationMinutesConverter;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
  * Film.
  */
 @Data
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 public class Film {
-
     @Positive(message = "Film ID must be positive number")
     private Integer id;
 
@@ -55,13 +57,22 @@ public class Film {
         return duration.toMinutes();
     }
 
-    private Raiting rating;
+    private Mpa mpa;
 
-    private final Set<Genre> genres = new HashSet<>();
+    @Builder.Default
+    private final Set<Genre> genres = new LinkedHashSet<>();
 
-    // Constructor to avoid all tests changes
+    // Genres must be sorted
+    public void setGenres(Collection<Genre> genres) {
+        this.genres.clear();
+        if (genres != null) {
+            this.genres.addAll(genres);
+        }
+    }
+
+    // Light Film constructor to avoid all old mem tests changes
     public Film(Integer id, String name, String description, LocalDate releaseDate, Duration duration) {
-        this(id,name,description,releaseDate,duration,null);
+        this(id,name,description,releaseDate,duration,null,null);
     }
 
 }

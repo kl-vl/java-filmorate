@@ -2,7 +2,7 @@
   id serial [pk]
   login varchar(50) [not null, unique]
   name varchar(100)
-  email varchar(255) [not null, unique]
+  email varchar(124) [not null, unique]
   birthday date
 
   indexes {
@@ -24,7 +24,7 @@ Table friendship {
 
 Table film {
   id serial [pk]
-  rate_id integer [ref: > rate.id]
+  mpa_id integer [ref: > mpa.id]
   name varchar(100)
   description varchar(200)
   release_date date
@@ -52,16 +52,15 @@ Table film_genre {
   }
 }
 
-Table rate {
+Table mpa {
   id serial [pk]
-  code varchar(5) [not null, unique]
-  name varchar(50)
+  name varchar(5) [not null, unique]
    indexes {
-    (code)  [unique]
+    (name)  [unique]
   }
 }
 
-Table film_likes {
+Table film_like {
   user_id integer [ref: > user.id]
   film_id integer [ref: > film.id]
   indexes {

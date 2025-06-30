@@ -35,7 +35,7 @@ public class FriendsService {
         }
 
         userRepository.addFriend(userId, friendId);
-        userRepository.addFriend(friendId, userId);
+
         return true;
     }
 

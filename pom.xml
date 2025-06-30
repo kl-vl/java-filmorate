@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.yandex.practicum</groupId>
     <artifactId>filmorate</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>filmorate</name>
     <description>Films rate application</description>
     <properties>
@@ -45,6 +45,15 @@
             <groupId>org.zalando</groupId>
             <artifactId>logbook-spring-boot-starter</artifactId>
             <version>3.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <!--<scope>test</scope>-->
         </dependency>
     </dependencies>
 
@@ -85,5 +94,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

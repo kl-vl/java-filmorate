@@ -1,7 +1,15 @@
--- user
-TRUNCATE TABLE "user" RESTART IDENTITY CASCADE;
 
-INSERT INTO "user" (login, name, email, birthday) VALUES
+--TRUNCATE TABLE rate RESTART IDENTITY;
+--DELETE FROM rate;
+--ALTER SEQUENCE rate_id_seq RESTART WITH 1;
+--TRUNCATE TABLE genre RESTART IDENTITY;
+--TRUNCATE TABLE friendship RESTART IDENTITY;
+--TRUNCATE TABLE film_likes RESTART IDENTITY;
+--TRUNCATE TABLE "user" RESTART IDENTITY;
+--TRUNCATE TABLE film RESTART IDENTITY;
+
+-- user
+/*INSERT INTO "user" (login, name, email, birthday) VALUES
     ('john_doe', 'John Doe', 'john.doe@example.com', '1990-05-15'),
     ('jane_smith', 'Jane Smith', 'jane.smith@example.com', '1992-08-22'),
     ('michael_johnson', 'Michael Johnson', 'michael.johnson@example.com', '1985-11-03'),
@@ -22,12 +30,11 @@ INSERT INTO "user" (login, name, email, birthday) VALUES
     ('jessica_lee', 'Jessica Lee', 'jessica.lee@example.com', '1992-11-15'),
     ('kevin_white', 'Kevin White', 'kevin.white@example.com', '1981-07-07'),
     ('susan_harris', 'Susan Harris', 'susan.harris@example.com', '1995-08-12');
-
+*/
 
 -- friendship
-TRUNCATE TABLE friendship;
 
-INSERT INTO friendship (user_id, friend_id, accepted)
+/*INSERT INTO friendship (user_id, friend_id, accepted)
 VALUES
 -- Пользователь 1 (John Doe) дружит с 2,3,4
 (1, 2, true),
@@ -78,12 +85,10 @@ VALUES
 (19, 2, false),   -- Kevin White → Jane Smith
 (20, 3, false)    -- Susan Harris → Michael Johnson
     ON CONFLICT (user_id, friend_id) DO NOTHING;
-
+*/
 
 -- film
-TRUNCATE TABLE film RESTART IDENTITY CASCADE;
-
-INSERT INTO film (name, description, release_date, duration, rate_id) VALUES
+/*INSERT INTO film (name, description, release_date, duration, rate_id) VALUES
     ('The Shawshank Redemption', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', '1994-09-23', 142, 4),
     ('The Godfather', 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.', '1972-03-24', 175, 4),
     ('The Dark Knight', 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.', '2008-07-18', 152, 4),
@@ -104,11 +109,10 @@ INSERT INTO film (name, description, release_date, duration, rate_id) VALUES
     ('Whiplash', 'A promising young drummer enrolls at a cut-throat music conservatory where his dreams of greatness are mentored by an instructor who will stop at nothing to realize a student''s potential.', '2014-10-10', 106, 3),
     ('Coco', 'Aspiring musician Miguel, confronted with his family''s ancestral ban on music, enters the Land of the Dead to find his great-great-grandfather, a legendary singer.', '2017-11-22', 105, 2),
     ('The Grand Budapest Hotel', 'The adventures of Gustave H, a legendary concierge at a famous hotel, and Zero Moustafa, the lobby boy who becomes his most trusted friend.', '2014-03-28', 99, 3);
-
+*/
 -- film_likes
-TRUNCATE TABLE film_likes;
 
-DO $$
+/*DO $$
 DECLARE
 user_id INT;
     film_id INT;
@@ -127,6 +131,7 @@ WHERE NOT EXISTS (
 ORDER BY random()
     LIMIT 1;
 
+
 -- Если нашли фильм - добавляем лайк
 IF film_id IS NOT NULL THEN
                 INSERT INTO film_likes (user_id, film_id) VALUES (user_id, film_id);
@@ -134,53 +139,21 @@ END IF;
 END LOOP;
 END LOOP;
 END $$;
-
+*/
 
 -- genre
-INSERT INTO genre
-    (name)
-VALUES ('Comedy'),
-       ('Drama'),
-       ('Cartoon'),
-       ('Thriller'),
-       ('Documentary'),
-       ('Action');
+MERGE INTO "genre" (id, name)
+VALUES (1, 'Комедия'),
+       (2, 'Драма'),
+       (3, 'Мультфильм'),
+       (4, 'Триллер'),
+       (5, 'Документальный'),
+       (6, 'Боевик');
 
 -- rate
-INSERT INTO rate (code, description)
-VALUES ('G', 'All ages admitted'),
-       ('PG', 'Some material may not be suitable for children'),
-       ('PG-13', 'Some material may be inappropriate for children under 13'),
-       ('R', Under 17 requires accompanying parent or adult guardian),
-       ('NC-17', 'No One 17 and Under Admitted - Adults only');
-
--- film_genre
-DO $$
-DECLARE
-film_record RECORD;
-    genre_ids INT[];
-    num_genres INT;
-    genre_id INT;
-BEGIN
-FOR film_record IN SELECT id FROM film LOOP
-    num_genres := 1 + floor(random() * 3)::INT;
-SELECT array_agg(id) INTO genre_ids
-FROM (
-         SELECT id
-         FROM genre
-         WHERE NOT EXISTS (
-             SELECT 1 FROM film_genre
-             WHERE film_id = film_record.id AND genre_id = genre.id
-         )
-         ORDER BY random()
-             LIMIT num_genres
-     ) AS random_genres;
-
-IF genre_ids IS NOT NULL THEN
-            FOREACH genre_id IN ARRAY genre_ids LOOP
-                INSERT INTO film_genre (film_id, genre_id)
-                VALUES (film_record.id, genre_id);
-END LOOP;
-END IF;
-END LOOP;
-END $$;
+MERGE INTO "mpa" (id, name)
+VALUES (1, 'G'),
+       (2, 'PG'),
+       (3, 'PG-13'),
+       (4, 'R'),
+       (5, 'NC-17');

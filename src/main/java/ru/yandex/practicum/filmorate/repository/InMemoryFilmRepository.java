@@ -27,17 +27,17 @@ public class InMemoryFilmRepository implements FilmRepository {
     private final UserRepository userRepository;
 
     @Override
-    public Film create(Film film) {
+    public Optional<Film> create(Film film) {
         if (film.getId() != null) {
             throw new FilmValidationException("New film should not have ID");
         }
         film.setId(idCounter.getAndIncrement());
         films.put(film.getId(), film);
-        return film;
+        return Optional.of(film);
     }
 
     @Override
-    public Film update(Film film) {
+    public Optional<Film> update(Film film) {
         if (film.getId() == null) {
             throw new FilmValidationException("Film ID must be provided for update");
         }
@@ -45,7 +45,7 @@ public class InMemoryFilmRepository implements FilmRepository {
             throw new FilmNotFoundException("The Film with ID=%s not found".formatted(film.getId()));
         }
         films.put(film.getId(), film);
-        return film;
+        return Optional.of(film);
     }
 
     @Override
@@ -61,13 +61,6 @@ public class InMemoryFilmRepository implements FilmRepository {
     @Override
     public Optional<Film> getById(Integer id) {
         return Optional.ofNullable(films.get(id));
-    }
-
-    @Override
-    public List<Film> getAllById(List<Integer> ids) {
-        return ids.stream().map(films::get)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -97,13 +90,13 @@ public class InMemoryFilmRepository implements FilmRepository {
     }
 
     @Override
-    public List<Integer> getPopularFilmIds(int count) {
+    public List<Film> getPopularFilms(int count) {
         return likes.entrySet().stream()
                 .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
                 .limit(count)
-                .map(Map.Entry::getKey)
+                .map(entry -> films.get(entry.getKey()))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
-
 
 }

@@ -37,7 +37,7 @@ class InMemoryFilmRepositoryTest {
 
     @Test
     void create_shouldGenerateNewId() {
-        final Film created = filmRepository.create(testFilm);
+        final Film created = filmRepository.create(testFilm).orElseThrow(() -> new FilmNotFoundException("Film not found"));
 
         assertAll("Generate id on create",
                 () -> assertNotNull(created.getId()),
@@ -55,10 +55,10 @@ class InMemoryFilmRepositoryTest {
 
     @Test
     void update_shouldUpdateExistingFilm() {
-        final Film created = filmRepository.create(testFilm);
+        final Film created = filmRepository.create(testFilm).orElseThrow(() -> new FilmNotFoundException("Film not found"));
         final Film toUpdate = new Film(created.getId(), "New Name", "New Desc", LocalDate.now(), Duration.ofMinutes(150));
 
-        final Film updated = filmRepository.update(toUpdate);
+        final Film updated = filmRepository.update(toUpdate).orElseThrow(() -> new FilmNotFoundException("Film not found"));
 
         assertAll("Update film",
                 () -> assertEquals("New Name", updated.getName()),
@@ -75,17 +75,17 @@ class InMemoryFilmRepositoryTest {
 
     @Test
     void create_shouldCreateWhenNoId() {
-        final Film result = filmRepository.create(testFilm);
+        final Film result = filmRepository.create(testFilm).orElseThrow(() -> new FilmNotFoundException("Film not found"));
 
         assertEquals(1, result.getId());
     }
 
     @Test
     void update_shouldUpdateWhenHasId() {
-        final Film created = filmRepository.create(testFilm);
+        final Film created = filmRepository.create(testFilm).orElseThrow(() -> new FilmNotFoundException("Film not found"));
         final Film toUpdate = new Film(created.getId(), "Updated", "Desc", LocalDate.of(2010, 7, 16), Duration.ofMinutes(148));
 
-        final Film result = filmRepository.update(toUpdate);
+        final Film result = filmRepository.update(toUpdate).orElseThrow(() -> new FilmNotFoundException("Film not found"));
 
         assertEquals("Updated", result.getName());
     }
@@ -141,24 +141,35 @@ class InMemoryFilmRepositoryTest {
     }
 
     @Test
-    void getPopularFilmIds_shouldReturnOrderedFilmIdsByLikes() {
-        for (int i = 1; i <= 3; i++) {
-            userRepository.create(testUser);
-            testUser.setId(null);
-            filmRepository.create(testFilm);
-            testFilm.setId(null);
-        }
+    void getPopularFils_shouldReturnOrderedFilmIdsByLikes() {
 
-        // Film 1 - 2 likes
+        Film testFilm1 = new Film(null, "Film 1", "Description 1", LocalDate.of(2011, 7, 16), Duration.ofMinutes(141));
+        Film testFilm2 = new Film(null, "Film 2", "Description 2", LocalDate.of(2012, 7, 16), Duration.ofMinutes(142));
+        Film testFilm3 = new Film(null, "Film 3", "Description 3", LocalDate.of(2013, 7, 16), Duration.ofMinutes(143));
+
+        User testUser1 = new User(null, "User 1", "user1", "user1@example.com", LocalDate.of(1991, 1, 1));
+        User testUser2 = new User(null, "User 2", "user2", "user2@example.com", LocalDate.of(1992, 2, 2));
+        User testUser3 = new User(null, "User 3", "user3", "user3@example.com", LocalDate.of(1993, 2, 3));
+
+        filmRepository.create(testFilm1);
+        filmRepository.create(testFilm2);
+        filmRepository.create(testFilm3);
+
+        userRepository.create(testUser1);
+        userRepository.create(testUser2);
+        userRepository.create(testUser3);
+
+        // Film 1 - 1 like
         filmRepository.addLike(1, 1);
-        filmRepository.addLike(1, 2);
-        // Film 2 - 1 like
+        // Film 2 - 3 likea
+        filmRepository.addLike(2, 1);
+        filmRepository.addLike(2, 2);
         filmRepository.addLike(2, 3);
         // Film 3 - no likes
 
-        List<Integer> popular = filmRepository.getPopularFilmIds(2);
+        List<Film> popular = filmRepository.getPopularFilms(2);
 
-        assertEquals(List.of(1, 2), popular);
+        assertEquals(2, popular.getFirst().getId());
     }
 
 }

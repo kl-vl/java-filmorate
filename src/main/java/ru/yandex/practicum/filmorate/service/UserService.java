@@ -19,7 +19,7 @@ public class UserService {
         log.debug("Creating user wil Login: {}", user.getLogin());
 
         user.setId(null);
-        User createdUser = repository.create(user);
+        User createdUser = repository.create(user).orElseThrow(() -> new IllegalStateException("User creation failed"));
 
         log.info("Successfully created User with ID: {}", createdUser.getId());
         log.debug("User created data: {}", createdUser);
@@ -39,7 +39,7 @@ public class UserService {
         if (!repository.existsById(user.getId())) {
             throw new UserNotFoundException("The User with ID %s does not exists".formatted(user.getId()));
         }
-        User updatedUser = repository.update(user);
+        User updatedUser = repository.update(user).orElseThrow(() -> new IllegalStateException("Film update failed"));
 
         log.info("User updated successfully. ID : {}", updatedUser.getId());
         log.debug("User updated data: {}", updatedUser);

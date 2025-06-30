@@ -15,13 +15,19 @@ import java.util.List;
 public class FilmService {
     private final FilmRepository repository;
 
+    public Film getFilmById(Integer id) {
+        return repository.getById(id).orElseThrow(() -> new FilmNotFoundException("Film not found"));
+    }
+
+
     public Film create(Film film) {
         log.info("Creating Film with name: {}", film.getName());
 
         film.setId(null);
-        Film createdFilm = repository.create(film);
+        Film createdFilm = repository.create(film)
+                .orElseThrow(() -> new IllegalStateException("Film creation failed"));
 
-        log.info("Film created successfully. ID : {}", film.getId());
+        log.info("Film created successfully. ID : {}", createdFilm.getId());
         log.debug("Film created data: {}", createdFilm);
 
         return createdFilm;
@@ -40,7 +46,7 @@ public class FilmService {
             throw new FilmNotFoundException("The Film with %s not found".formatted(film.getId()));
         }
 
-        Film updatedFilm = repository.update(film);
+        Film updatedFilm = repository.update(film).orElseThrow(() -> new IllegalStateException("Film update failed"));;
 
         log.info("Film updated successfully. ID : {}", updatedFilm.getId());
         log.debug("Film updated data: {}", updatedFilm);
