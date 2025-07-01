@@ -24,7 +24,7 @@ public class GenreService {
     }
 
     public List<Genre> getAllGenres() {
-        log.debug("Getting genres list");
+        log.info("Getting genres list");
 
         return genreRepository.findAll();
     }

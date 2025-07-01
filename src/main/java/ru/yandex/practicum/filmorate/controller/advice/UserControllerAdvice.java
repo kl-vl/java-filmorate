@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.dto.error.ErrorResponse;
+import ru.yandex.practicum.filmorate.exception.UserCreateFailed;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserValidationException;
 
@@ -28,6 +29,14 @@ public class UserControllerAdvice {
         log.warn("User not found in {}: {}", request.getDescription(false), ex.getMessage());
 
         return new ErrorResponse(ex.getMessage(), "USER_NOT_FOUND");
+    }
+
+    @ExceptionHandler(UserCreateFailed.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleUserCreateFailed(UserCreateFailed ex, WebRequest request) {
+        log.warn("User create failed in {}: {}", request.getDescription(false), ex.getMessage());
+
+        return new ErrorResponse(ex.getMessage(), "User_CREATE_FAILED");
     }
 
     @ExceptionHandler(UserValidationException.class)

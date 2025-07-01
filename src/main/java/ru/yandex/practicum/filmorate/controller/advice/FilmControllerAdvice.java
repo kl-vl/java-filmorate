@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.dto.error.ErrorResponse;
+import ru.yandex.practicum.filmorate.exception.FilmCreateFailed;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
@@ -30,6 +31,14 @@ public class FilmControllerAdvice {
         log.warn("Film not found in {}: {}", request.getDescription(false), ex.getMessage());
 
         return new ErrorResponse(ex.getMessage(), "FILM_NOT_FOUND");
+    }
+
+    @ExceptionHandler(FilmCreateFailed.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleFilmCreateFailed(FilmCreateFailed ex, WebRequest request) {
+        log.warn("Film create failed in {}: {}", request.getDescription(false), ex.getMessage());
+
+        return new ErrorResponse(ex.getMessage(), "FILM_CREATE_FAILED");
     }
 
     @ExceptionHandler(UserNotFoundException.class)

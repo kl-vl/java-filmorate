@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.exception.FilmCreateFailed;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
@@ -120,7 +121,7 @@ public class DbFilmRepository implements FilmRepository {
 
         genreRepository.saveGenres(film, false);
 
-        return Optional.ofNullable(getFilmWithDetails(generatedId).orElseThrow(() -> new IllegalStateException("Film not created")));
+        return Optional.ofNullable(getFilmWithDetails(generatedId).orElseThrow(() -> new FilmCreateFailed("Film not created")));
     }
 
 
@@ -147,7 +148,7 @@ public class DbFilmRepository implements FilmRepository {
 
         genreRepository.saveGenres(film, true);
 
-        return Optional.ofNullable(getFilmWithDetails(film.getId()).orElseThrow(() -> new IllegalStateException("Фильм не был создан")));
+        return Optional.ofNullable(getFilmWithDetails(film.getId()).orElseThrow(() -> new FilmCreateFailed("Film create failed")));
     }
 
 
@@ -158,13 +159,13 @@ public class DbFilmRepository implements FilmRepository {
     }
 
     private void validateGenres(Set<Genre> genres) {
-        if (genres.stream().map(Genre::getId).distinct().count() != genres.size()) {
-            throw new ValidationException("Duplicate genre ids found");
-        }
-
         Set<Integer> genreIds = genres.stream()
                 .map(Genre::getId)
                 .collect(Collectors.toSet());
+
+        if (genreIds.size() != genres.size()) {
+            throw new ValidationException("Duplicate genre ids found");
+        }
 
         List<Integer> existingIds = genreRepository.findAllExistingIds(genreIds);
 

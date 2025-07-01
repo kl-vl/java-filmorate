@@ -16,8 +16,6 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Primary
 @Repository
@@ -122,15 +120,7 @@ public class DbUserRepository implements UserRepository {
 
     @Override
     public Optional<User> get(Integer id) {
-        return getById(id)
-                .map(user -> {
-                    Set<User> friends = getFriends(id).stream()
-                            .map(this::getById)
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .collect(Collectors.toSet());
-                    return user;
-                });
+        return getById(id);
     }
 
 }
