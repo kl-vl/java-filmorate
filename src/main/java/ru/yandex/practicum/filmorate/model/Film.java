@@ -60,14 +60,21 @@ public class Film {
     private Mpa mpa;
 
     @Builder.Default
-    private final Set<Genre> genres = new LinkedHashSet<>();
+    private Set<Genre> genres = newModifiableSet(); // Наш метод для создания изменяемого Set
 
-    // Genres must be sorted
     public void setGenres(Collection<Genre> genres) {
         this.genres.clear();
         if (genres != null) {
-            this.genres.addAll(genres);
+            this.genres.addAll(new LinkedHashSet<>(genres)); // Гарантируем порядок
         }
+    }
+
+    public void addGenre(Genre genre) {
+        this.genres.add(genre);
+    }
+
+    private static Set<Genre> newModifiableSet() {
+        return new LinkedHashSet<>();
     }
 
     // Light Film constructor to avoid all old mem tests changes

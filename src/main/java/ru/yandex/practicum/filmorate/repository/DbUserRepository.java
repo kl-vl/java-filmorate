@@ -8,11 +8,10 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.repository.mappers.UserRowMapper;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Objects;
@@ -42,16 +41,7 @@ public class DbUserRepository implements UserRepository {
     private static final String SQL_SELECT_FRIENDSHIP_BY_IDS = "SELECT COUNT(*) FROM \"friendship\" WHERE user_id = ? AND friend_id = ?";
 
     private final JdbcTemplate jdbcTemplate;
-
-    private User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
-        return User.builder()
-                .id(rs.getInt("id"))
-                .email(rs.getString("email"))
-                .login(rs.getString("login"))
-                .name(rs.getString("name"))
-                .birthday(rs.getDate("birthday").toLocalDate())
-                .build();
-    }
+    private final UserRowMapper userRowMapper;
 
     @Override
     @Transactional
@@ -87,7 +77,7 @@ public class DbUserRepository implements UserRepository {
 
     @Override
     public List<User> findAll() {
-        return jdbcTemplate.query(SQL_SELECT_ALL, this::mapRowToUser);
+        return jdbcTemplate.query(SQL_SELECT_ALL, userRowMapper);
     }
 
     @Override
@@ -98,7 +88,7 @@ public class DbUserRepository implements UserRepository {
 
     @Override
     public Optional<User> getById(Integer id) {
-        List<User> users = jdbcTemplate.query(SQL_SELECT_BY_ID, this::mapRowToUser, id);
+        List<User> users = jdbcTemplate.query(SQL_SELECT_BY_ID, userRowMapper, id);
         return users.isEmpty() ? Optional.empty() : Optional.of(users.getFirst());
     }
 

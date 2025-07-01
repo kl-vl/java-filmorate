@@ -15,15 +15,13 @@ import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.repository.mappers.FilmRowMapper;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -48,10 +46,10 @@ public class DbFilmRepository implements FilmRepository {
                 f.id, f.name, f.description, f.release_date, f.duration,
                 m.id AS mpa_id, m.name AS mpa_name,
                 g.id AS genre_id, g.name AS genre_name
-            FROM \"film\" f
-            LEFT JOIN \"mpa\" m ON f.mpa_id = m.id
-            LEFT JOIN \"film_genre\" fg ON f.id = fg.film_id
-            LEFT JOIN \"genre\" g ON fg.genre_id = g.id
+            FROM "film" f
+            LEFT JOIN "mpa" m ON f.mpa_id = m.id
+            LEFT JOIN "film_genre" fg ON f.id = fg.film_id
+            LEFT JOIN "genre" g ON fg.genre_id = g.id
             WHERE f.id = ?
             ORDER BY g.id ASC
             """;
@@ -66,10 +64,10 @@ public class DbFilmRepository implements FilmRepository {
                 m.name AS mpa_name,
                 g.id AS genre_id,
                 g.name AS genre_name
-            FROM \"film\" f
-            LEFT JOIN \"mpa\" m ON f.mpa_id = m.id
-            LEFT JOIN \"film_genre\" fg ON f.id = fg.film_id
-            LEFT JOIN \"genre\" g ON fg.genre_id = g.id
+            FROM "film" f
+            LEFT JOIN "mpa" m ON f.mpa_id = m.id
+            LEFT JOIN "film_genre" fg ON f.id = fg.film_id
+            LEFT JOIN "genre" g ON fg.genre_id = g.id
             ORDER BY f.id, g.id
             LIMIT ?
             """;
@@ -81,51 +79,20 @@ public class DbFilmRepository implements FilmRepository {
                 m.id AS mpa_id, m.name AS mpa_name,
                 g.id AS genre_id, g.name AS genre_name,
                 COUNT(fl.user_id) AS likes_count
-            FROM \"film\" f
-            LEFT JOIN \"mpa\" m ON f.mpa_id = m.id
-            LEFT JOIN \"film_genre\" fg ON f.id = fg.film_id
-            LEFT JOIN \"genre\" g ON fg.genre_id = g.id
-            LEFT JOIN \"film_like\" fl ON f.id = fl.film_id
+            FROM "film" f
+            LEFT JOIN "mpa" m ON f.mpa_id = m.id
+            LEFT JOIN "film_genre" fg ON f.id = fg.film_id
+            LEFT JOIN "genre" g ON fg.genre_id = g.id
+            LEFT JOIN "film_like" fl ON f.id = fl.film_id
             GROUP BY f.id, m.id, g.id
             ORDER BY likes_count DESC
             LIMIT ?
             """;
 
-
     private final JdbcTemplate jdbcTemplate;
     private final DbMpaRepository mpaRepository;
     private final DbGenreRepository genreRepository;
-
-    private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
-        Film.FilmBuilder builder = Film.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
-                .genres(Collections.emptySet());
-
-        String description = rs.getString("description");
-        if (!rs.wasNull()) {
-            builder.description(description);
-        }
-
-        Date releaseDate = rs.getDate("release_date");
-        if (releaseDate != null) {
-            builder.releaseDate(releaseDate.toLocalDate());
-        }
-
-        int durationMinutes = rs.getInt("duration");
-        if (!rs.wasNull() && durationMinutes > 0) {
-            builder.duration(Duration.ofMinutes(durationMinutes));
-        } else {
-            builder.duration(Duration.ZERO);
-        }
-
-        Integer mpaId = rs.getObject("mpa_id", Integer.class);
-        if (mpaId != null) {
-            builder.mpa(Mpa.builder().id(mpaId).build());
-        }
-
-        return builder.build();
-    }
+    private final FilmRowMapper filmRowMapper;
 
     @Override
     @Transactional
@@ -241,7 +208,7 @@ public class DbFilmRepository implements FilmRepository {
                         film.setMpa(mpa);
                     }
 
-                    film.setGenres(new LinkedHashSet<>());
+                    //film.setGenres(new LinkedHashSet<>());
                     filmMap.put(currentId, film);
                 }
 
@@ -273,7 +240,7 @@ public class DbFilmRepository implements FilmRepository {
         return count != null && count > 0;
     }
 
-
+    @Override
     public List<Film> findAll() {
         return findAll(DEFAULT_FILM_LIMIT);
     }
@@ -301,10 +268,11 @@ public class DbFilmRepository implements FilmRepository {
             }
 
             if (rs.getObject("genre_id") != null) {
-                film.getGenres().add(new Genre(
+                Genre genre = new Genre(
                         rs.getInt("genre_id"),
                         rs.getString("genre_name")
-                ));
+                );
+                film.getGenres().add(genre);
             }
         }, limit);
 
@@ -334,10 +302,10 @@ public class DbFilmRepository implements FilmRepository {
             }
 
             if (rs.getObject("genre_id") != null) {
-                film.getGenres().add(new Genre(
+                film.addGenre(new Genre(
                         rs.getInt("genre_id"),
-                        rs.getString("genre_name"))
-                );
+                        rs.getString("genre_name")
+                ));
             }
         }, limit);
 

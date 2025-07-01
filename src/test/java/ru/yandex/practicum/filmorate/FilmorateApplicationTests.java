@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -17,9 +18,14 @@ import ru.yandex.practicum.filmorate.repository.DbFilmRepository;
 import ru.yandex.practicum.filmorate.repository.DbGenreRepository;
 import ru.yandex.practicum.filmorate.repository.DbMpaRepository;
 import ru.yandex.practicum.filmorate.repository.DbUserRepository;
+import ru.yandex.practicum.filmorate.repository.mappers.FilmRowMapper;
+import ru.yandex.practicum.filmorate.repository.mappers.GenreRowMapper;
+import ru.yandex.practicum.filmorate.repository.mappers.MpaRowMapper;
+import ru.yandex.practicum.filmorate.repository.mappers.UserRowMapper;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -33,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JdbcTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({DbUserRepository.class, DbFilmRepository.class, DbGenreRepository.class, DbMpaRepository.class})
+@Import({DbUserRepository.class, DbFilmRepository.class, DbGenreRepository.class, DbMpaRepository.class, FilmRowMapper.class, UserRowMapper.class, GenreRowMapper.class, MpaRowMapper.class})
 @Transactional
 class FilmorateApplicationTests {
 
@@ -91,9 +97,7 @@ class FilmorateApplicationTests {
                 .releaseDate(LocalDate.of(2002, 2, 2))
                 .duration(Duration.ofMinutes(122))
                 .mpa(mpaRepository.getMpaById(2).orElseThrow())
-                .genres(Set.of(
-                        new Genre(5, "Боевик>")
-                ))
+                .genres(new LinkedHashSet<>())
                 .build();
 
         jdbcTemplate.execute("DELETE FROM \"film_genre\"");
@@ -260,6 +264,14 @@ class FilmorateApplicationTests {
         testFilm1.setMpa(new Mpa(999, "Invalid"));
 
         assertThrows(MpaNotFoundException.class, () -> filmRepository.create(testFilm1).orElseThrow());
+    }
+
+    @Test
+    void validateGenres_ShouldThrowWhenInvalid() {
+        testFilm2.addGenre(new Genre(999, "Invalid Genre"));
+
+        assertThrows(GenreNotFoundException.class,
+                () -> filmRepository.create(testFilm2));
     }
 
     @Test

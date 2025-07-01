@@ -2,10 +2,10 @@ package ru.yandex.practicum.filmorate.repository;
 
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.repository.mappers.GenreRowMapper;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,12 +30,7 @@ public class DbGenreRepository {
     private static final String SQL_SELECT_GENRE_ORDER_BY_ID = "SELECT * FROM \"genre\" ORDER BY id ASC";
 
     private final JdbcTemplate jdbcTemplate;
-
-    private final RowMapper<Genre> genreRowMapper = (rs, rowNum) ->
-            Genre.builder()
-                    .id(rs.getInt("id"))
-                    .name(rs.getString("name"))
-                    .build();
+    private final GenreRowMapper genreRowMapper;
 
     public Optional<Genre> findById(Integer id) {
         List<Genre> genres = jdbcTemplate.query(SQL_SELECT_GENRE_BY_ID, genreRowMapper, id);
