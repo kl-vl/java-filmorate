@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.UserCreateFailed;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
@@ -19,7 +20,7 @@ public class UserService {
         log.debug("Creating user wil Login: {}", user.getLogin());
 
         user.setId(null);
-        User createdUser = repository.create(user);
+        User createdUser = repository.create(user).orElseThrow(() -> new UserCreateFailed("User creation failed"));
 
         log.info("Successfully created User with ID: {}", createdUser.getId());
         log.debug("User created data: {}", createdUser);
@@ -39,7 +40,7 @@ public class UserService {
         if (!repository.existsById(user.getId())) {
             throw new UserNotFoundException("The User with ID %s does not exists".formatted(user.getId()));
         }
-        User updatedUser = repository.update(user);
+        User updatedUser = repository.update(user).orElseThrow(() -> new UserCreateFailed("User update failed"));
 
         log.info("User updated successfully. ID : {}", updatedUser.getId());
         log.debug("User updated data: {}", updatedUser);

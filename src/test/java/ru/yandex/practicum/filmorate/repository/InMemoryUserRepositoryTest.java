@@ -29,7 +29,7 @@ class InMemoryUserRepositoryTest {
 
     @Test
     void create_shouldGenerateIdAndSaveUser() {
-        final User createdUser = userRepository.create(testUser);
+        final User createdUser = userRepository.create(testUser).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         assertAll("Generate id on User create",
                 () -> assertNotNull(createdUser.getId()),
@@ -47,8 +47,8 @@ class InMemoryUserRepositoryTest {
 
     @Test
     void create_shouldIncrementIdCounter() {
-        final User user1 = userRepository.create(testUser);
-        final User user2 = userRepository.create(new User(null, "Jane", "jane", "jane@example.com", LocalDate.now()));
+        final User user1 = userRepository.create(testUser).orElseThrow(() -> new UserNotFoundException("User not found"));
+        final User user2 = userRepository.create(new User(null, "Jane", "jane", "jane@example.com", LocalDate.now())).orElseThrow(() -> new UserNotFoundException("User not found"));;
 
         assertAll("Increment id counter",
                 () -> assertEquals(1, user1.getId()),
@@ -58,10 +58,10 @@ class InMemoryUserRepositoryTest {
 
     @Test
     void update_shouldUpdateExistingUser() {
-        final User createdUser = userRepository.create(testUser);
+        final User createdUser = userRepository.create(testUser).orElseThrow(() -> new UserNotFoundException("User not found"));
         final User updatedUser = new User(createdUser.getId(), "John Updated", "johndoe", "new@example.com", LocalDate.now());
 
-        final User result = userRepository.update(updatedUser);
+        final User result = userRepository.update(updatedUser).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         assertAll("Update user",
                 () -> assertEquals("John Updated", result.getName()),
@@ -93,8 +93,8 @@ class InMemoryUserRepositoryTest {
 
     @Test
     void findAll_shouldReturnAllUsers() {
-        final User user1 = userRepository.create(testUser);
-        final User user2 = userRepository.create(new User(null, "Jane", "jane", "jane@example.com", LocalDate.now()));
+        final User user1 = userRepository.create(testUser).orElseThrow(() -> new UserNotFoundException("User not found"));
+        final User user2 = userRepository.create(new User(null, "Jane", "jane", "jane@example.com", LocalDate.now())).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         final List<User> users = userRepository.findAll();
 
@@ -112,7 +112,7 @@ class InMemoryUserRepositoryTest {
 
     @Test
     void existsById_shouldReturnTrueForExistingId() {
-        final User createdUser = userRepository.create(testUser);
+        final User createdUser = userRepository.create(testUser).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         assertTrue(userRepository.existsById(createdUser.getId()));
     }

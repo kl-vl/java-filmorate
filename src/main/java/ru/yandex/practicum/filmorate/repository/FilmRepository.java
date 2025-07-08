@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FilmRepository {
-    Film create(Film film);
+    Optional<Film> create(Film film);
 
-    Film update(Film film);
+    Optional<Film> update(Film film);
 
     List<Film> findAll();
 
@@ -16,12 +16,10 @@ public interface FilmRepository {
 
     Optional<Film> getById(Integer id);
 
-    List<Film> getAllById(List<Integer> ids);
-
     boolean addLike(Integer filmId, Integer userId);
 
     boolean removeLike(Integer filmId, Integer userId);
 
-    List<Integer> getPopularFilmIds(int count);
+    List<Film> getPopularFilms(int count);
 
 }

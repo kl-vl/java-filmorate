@@ -1,0 +1,69 @@
+﻿Table user {
+  id serial [pk]
+  login varchar(50) [not null, unique]
+  name varchar(100)
+  email varchar(124) [not null, unique]
+  birthday date
+
+  indexes {
+    (login) [unique, name:'idx_user_login']
+    (email) [unique, name:'idx_user_email']
+  }
+}
+
+Table friendship {
+  user_id integer [ref: > user.id]
+  friend_id integer [ref: > user.id]
+  accepted boolean [default: false]
+
+  indexes {
+    (user_id, friend_id) [unique, name: 'uniq_friendship_user_friend']
+    (accepted) [name: 'idx_friendship_accepted']
+  }
+}
+
+Table film {
+  id serial [pk]
+  mpa_id integer [ref: > mpa.id]
+  name varchar(100)
+  description varchar(200)
+  release_date date
+  duration integer
+  likes_count integer [default: 0]
+  indexes {
+    (likes_count) [name: "idx_film_likes_count"]
+  }
+}
+
+Table genre {
+  id serial [pk]
+  name varchar(50) [not null, unique]
+    indexes {
+    (name) [unique, name: "idx_genre_name"]
+  }
+
+}
+
+Table film_genre {
+  film_id integer [ref: > film.id]
+  genre_id integer [ref: > genre.id]
+  indexes {
+    (film_id, genre_id) [pk]
+  }
+}
+
+Table mpa {
+  id serial [pk]
+  name varchar(5) [not null, unique]
+   indexes {
+    (name)  [unique]
+  }
+}
+
+Table film_like {
+  user_id integer [ref: > user.id]
+  film_id integer [ref: > film.id]
+  indexes {
+    (user_id, film_id) [pk]
+  }
+}
