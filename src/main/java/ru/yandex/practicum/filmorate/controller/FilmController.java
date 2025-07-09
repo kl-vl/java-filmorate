@@ -75,6 +75,12 @@ public class FilmController {
         return likeService.getPopularFilms(count);
     }
 
+    @DeleteMapping("/{filmId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeFilmById(@PathVariable(name = "filmId") Integer filmId) {
+        filmService.removeFilmById(filmId);
+    }
+
     @GetMapping("/director/{directorId}")
     public List<Film> getFilmsByDirector(
             @PathVariable int directorId,

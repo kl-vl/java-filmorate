@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
+import jakarta.validation.FilmValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmCreateFailed;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.DbDirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
@@ -63,5 +65,15 @@ public class FilmService {
                 .orElseThrow(() -> new DirectorNotFoundException("Director not found with id: " + directorId));
 
         return repository.findFilmsByDirectorId(directorId, sortBy);
+    }
+
+    public void removeFilmById(Integer filmId) {
+        if (filmId == null) {
+            throw new FilmValidationException("ID фильма должно быть указано");
+        }
+
+        if (!repository.removeFilmById(filmId)) {
+            throw new FilmNotFoundException("Фильм с id { " + filmId + " } - не найден");
+        }
     }
 }
