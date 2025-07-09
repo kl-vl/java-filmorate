@@ -22,4 +22,5 @@ public interface FilmRepository {
 
     List<Film> getPopularFilms(int count);
 
+    List<Film> getCommonFilms(Integer userId, Integer friendId);
 }
