@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserCreateFailed;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
@@ -46,6 +47,16 @@ public class UserService {
         log.debug("User updated data: {}", updatedUser);
 
         return updatedUser;
+    }
+
+    public void removeUserById(Integer userId) {
+        if (userId == null) {
+            throw new UserValidationException("ID пользователя должен быть указан");
+        }
+
+        if (!repository.removeUserById(userId)) {
+            throw new UserNotFoundException("Пользователь с id { " + userId + " } - не найден");
+        }
     }
 
 }

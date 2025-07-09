@@ -141,4 +141,8 @@ public class InMemoryUserRepository implements UserRepository {
         return Optional.ofNullable(users.get(id));
     }
 
+    @Override
+    public boolean removeUserById(Integer userId) {
+        throw new UnsupportedOperationException();
+    }
 }

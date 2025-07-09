@@ -22,4 +22,6 @@ public interface FilmRepository {
 
     List<Film> getPopularFilms(int count);
 
+    public boolean removeFilmById(Integer filmId);
+
 }

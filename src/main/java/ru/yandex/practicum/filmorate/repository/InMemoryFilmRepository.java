@@ -99,4 +99,8 @@ public class InMemoryFilmRepository implements FilmRepository {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public boolean removeFilmById(Integer filmId) {
+        throw new UnsupportedOperationException();
+    }
 }

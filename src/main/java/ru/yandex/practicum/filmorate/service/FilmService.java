@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,7 +9,8 @@ import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
-import java.util.List;
+import java.util.*;
+import javax.crypto.spec.OAEPParameterSpec;
 
 @Slf4j
 @Service
@@ -53,5 +55,15 @@ public class FilmService {
         log.debug("Film updated data: {}", updatedFilm);
 
         return updatedFilm;
+    }
+
+    public void removeFilmById(Integer filmId) {
+        if (filmId == null) {
+            throw new ValidationException("ID фильма должно быть указано");
+        }
+
+        if (!repository.removeFilmById(filmId)) {
+            throw new FilmNotFoundException("Фильм с id { " + filmId + " } - не найден");
+        }
     }
 }

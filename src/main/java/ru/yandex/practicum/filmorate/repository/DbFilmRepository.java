@@ -90,6 +90,8 @@ public class DbFilmRepository implements FilmRepository {
             LIMIT ?
             """;
 
+    private static final String SQL_REMOVE_FILM_BY_ID = "DELETE FROM film WHERE id = ?";
+
     private final JdbcTemplate jdbcTemplate;
     private final DbMpaRepository mpaRepository;
     private final DbGenreRepository genreRepository;
@@ -336,4 +338,10 @@ public class DbFilmRepository implements FilmRepository {
         return updated > 0;
     }
 
+    @Override
+    public boolean removeFilmById(Integer filmId) {
+        int delete = jdbcTemplate.update(SQL_REMOVE_FILM_BY_ID, filmId);
+
+        return delete > 0;
+    }
 }

@@ -72,4 +72,10 @@ public class UserController {
         return friendsService.getCommonFriends(userId, otherId);
     }
 
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeUserById(@PathVariable(name = "userId") Integer userId) {
+        userService.removeUserById(userId);
+    }
+
 }
