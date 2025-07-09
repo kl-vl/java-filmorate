@@ -127,6 +127,8 @@ public class DbUserRepository implements UserRepository {
     @Override
     public boolean removeUserById(Integer userId) {
         int delete = jdbcTemplate.update(SQL_REMOVE_USER_BY_ID, userId);
+
         return delete > 0;
     }
+
 }

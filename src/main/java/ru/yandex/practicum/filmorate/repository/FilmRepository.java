@@ -22,8 +22,6 @@ public interface FilmRepository {
 
     List<Film> getPopularFilms(int count);
 
-    public boolean removeFilmById(Integer filmId);
-
     List<Film> findFilmsByDirectorId(int directorId, String sortBy);
 
     List<Film> getCommonFilms(Integer userId, Integer friendId);
