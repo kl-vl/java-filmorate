@@ -27,4 +27,7 @@ public interface FilmRepository {
     List<Film> findFilmsByDirectorId(int directorId, String sortBy);
 
     List<Film> getCommonFilms(Integer userId, Integer friendId);
+
+    public boolean removeFilmById(Integer filmId);
+
 }
