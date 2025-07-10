@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -435,40 +434,10 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    void userDeleting_MustUndergoCheck() {
-        Optional<User> createUser = userRepository.create(testUser1);
-
-        Assertions.assertNotNull(createUser.get());
-
-        int userId = createUser.get().getId();
-
-        userRepository.removeUserById(userId);
-
-        Optional<User> optionalIsNull = userRepository.getById(userId);
-
-        Assertions.assertTrue(optionalIsNull.isEmpty());
-    }
-
-    @Test
-    void removal_OfFilmMustUndergoCheck() {
-        Optional<Film> createFilm = filmRepository.create(testFilm1);
-
-        Assertions.assertNotNull(createFilm.get());
-
-        int filmId = createFilm.get().getId();
-
-        filmRepository.removeFilmById(filmId);
-
-        Optional<Film> optionalIsEmpty = filmRepository.getById(filmId);
-
-        Assertions.assertTrue(optionalIsEmpty.isEmpty());
-    }
-
-    @Test
     void shouldCreateReview() {
         createReviews();
 
-        Assertions.assertThat(testReview1).isNotNull()
+        assertThat(testReview1).isNotNull()
                 .hasFieldOrPropertyWithValue("content", "Good film")
                 .hasFieldOrPropertyWithValue("isPositive", true)
                 .hasFieldOrPropertyWithValue("useful", 0)
@@ -485,7 +454,7 @@ class FilmorateApplicationTests {
         review.setContent("Very Good film");
         testReview1 = reviewRepository.update(review).orElseThrow();
 
-        Assertions.assertThat(testReview1).isNotNull()
+        assertThat(testReview1).isNotNull()
                 .hasFieldOrPropertyWithValue("content", "Very Good film");
     }
 
@@ -494,7 +463,7 @@ class FilmorateApplicationTests {
         createReviews();
         Review review = reviewRepository.getReviewById(2).orElseThrow();
 
-        Assertions.assertThat(review).isNotNull()
+        assertThat(review).isNotNull()
                 .hasFieldOrPropertyWithValue("content", "Bad film");
     }
 
@@ -616,7 +585,7 @@ class FilmorateApplicationTests {
     void userDeleting_MustUndergoCheck() {
         Optional<User> createUser = userRepository.create(testUser1);
 
-        Assertions.assertNotNull(createUser.get());
+        assertNotNull(createUser.get());
 
         int userId = createUser.get().getId();
 
@@ -624,14 +593,14 @@ class FilmorateApplicationTests {
 
         Optional<User> optionalIsNull = userRepository.getById(userId);
 
-        Assertions.assertTrue(optionalIsNull.isEmpty());
+        assertTrue(optionalIsNull.isEmpty());
     }
 
     @Test
     void removal_OfFilmMustUndergoCheck() {
         Optional<Film> createFilm = filmRepository.create(testFilm1);
 
-        Assertions.assertNotNull(createFilm.get());
+        assertNotNull(createFilm.get());
 
         int filmId = createFilm.get().getId();
 
@@ -639,6 +608,6 @@ class FilmorateApplicationTests {
 
         Optional<Film> optionalIsEmpty = filmRepository.getById(filmId);
 
-        Assertions.assertTrue(optionalIsEmpty.isEmpty());
+        assertTrue(optionalIsEmpty.isEmpty());
     }
 }
