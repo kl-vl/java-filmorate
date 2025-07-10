@@ -98,7 +98,7 @@ class UserValidationTest {
         assertAll("Future birthday",
                 () -> assertEquals(1, violations.size()),
                 () -> assertEquals("{jakarta.validation.constraints.PastOrPresent.message}",
-                    violations.iterator().next().getMessageTemplate())
+                        violations.iterator().next().getMessageTemplate())
         );
     }
 

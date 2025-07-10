@@ -100,6 +100,11 @@ public class InMemoryFilmRepository implements FilmRepository {
     }
 
     @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return List.of();
+    }
+
+    @Override
     public List<Film> findFilmsByDirectorId(int directorId, String sortBy) {
         throw new UnsupportedOperationException("This method is not implemented.");
     }
