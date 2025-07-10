@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
 import java.util.*;
-import javax.crypto.spec.OAEPParameterSpec;
 
 @Slf4j
 @Service
@@ -61,9 +60,6 @@ public class FilmService {
         if (filmId == null) {
             throw new ValidationException("ID фильма должно быть указано");
         }
-
-        if (!repository.removeFilmById(filmId)) {
-            throw new FilmNotFoundException("Фильм с id { " + filmId + " } - не найден");
-        }
+        repository.removeFilmById(filmId);
     }
 }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -282,4 +283,33 @@ class FilmorateApplicationTests {
         assertFalse(filmRepository.existsById(999));
     }
 
+    @Test
+    void userDeleting_MustUndergoCheck() {
+        Optional<User> createUser = userRepository.create(testUser1);
+
+        Assertions.assertNotNull(createUser.get());
+
+        int userId = createUser.get().getId();
+
+        userRepository.removeUserById(userId);
+
+        Optional<User> optionalIsNull = userRepository.getById(userId);
+
+        Assertions.assertTrue(optionalIsNull.isEmpty());
+    }
+
+    @Test
+    void removal_OfFilmMustUndergoCheck() {
+        Optional<Film> createFilm = filmRepository.create(testFilm1);
+
+        Assertions.assertNotNull(createFilm.get());
+
+        int filmId = createFilm.get().getId();
+
+        filmRepository.removeFilmById(filmId);
+
+        Optional<Film> optionalIsEmpty = filmRepository.getById(filmId);
+
+        Assertions.assertTrue(optionalIsEmpty.isEmpty());
+    }
 }

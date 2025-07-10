@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.exception.UserValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -27,6 +27,15 @@ public class UserService {
         log.debug("User created data: {}", createdUser);
 
         return createdUser;
+    }
+
+    public User getUserById(Integer userId) {
+        if (userId == null) {
+            throw new UserNotFoundException("ID должен быть указан");
+        }
+
+        return repository.getById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с id { " + userId + " } - не найден"));
     }
 
     public List<User> getList() {
@@ -58,5 +67,4 @@ public class UserService {
             throw new UserNotFoundException("Пользователь с id { " + userId + " } - не найден");
         }
     }
-
 }

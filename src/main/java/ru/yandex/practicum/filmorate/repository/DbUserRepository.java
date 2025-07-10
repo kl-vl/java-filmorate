@@ -37,7 +37,7 @@ public class DbUserRepository implements UserRepository {
             WHERE f1.user_id = ? AND f2.user_id = ?
             """;
     private static final String SQL_SELECT_FRIENDSHIP_BY_IDS = "SELECT COUNT(*) FROM \"friendship\" WHERE user_id = ? AND friend_id = ?";
-    private static final String SQL_REMOVE_USER_BY_ID = "DELETE FROM users WHERE id = ?";
+    private static final String SQL_REMOVE_USER_BY_ID = "DELETE FROM \"user\" WHERE id = ?";
 
     private final JdbcTemplate jdbcTemplate;
     private final UserRowMapper userRowMapper;
@@ -127,7 +127,6 @@ public class DbUserRepository implements UserRepository {
     @Override
     public boolean removeUserById(Integer userId) {
         int delete = jdbcTemplate.update(SQL_REMOVE_USER_BY_ID, userId);
-
         return delete > 0;
     }
 }
