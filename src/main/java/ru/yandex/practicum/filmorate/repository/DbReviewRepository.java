@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -14,9 +15,10 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
+@Primary
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class DbReviewRepository {
     private static final String SQL_SELECT_BY_ID = "SELECT * FROM \"review\" WHERE id = ?";
     private static final String SQL_INSERT_REVIEW = "INSERT INTO \"review\" (content, is_positive, user_id, film_id, useful) " +
@@ -208,3 +210,5 @@ public class DbReviewRepository {
     }
 
 }
+
+
