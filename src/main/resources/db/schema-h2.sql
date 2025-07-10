@@ -47,6 +47,8 @@ CREATE TABLE IF NOT EXISTS "film" (
     CONSTRAINT fk_film_mpa FOREIGN KEY (mpa_id) REFERENCES "mpa"(id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_film_release_date ON "film"(release_date);
+
 -- film_likes
 CREATE TABLE IF NOT EXISTS "film_like" (
     user_id INTEGER REFERENCES "user"(id),
@@ -59,6 +61,19 @@ CREATE TABLE IF NOT EXISTS "film_genre" (
     film_id INTEGER REFERENCES "film"(id),
     genre_id INTEGER REFERENCES "genre"(id),
     PRIMARY KEY (film_id, genre_id)
+);
+
+-- director
+CREATE TABLE IF NOT EXISTS "director" (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL
+);
+
+-- film_director
+CREATE TABLE IF NOT EXISTS "film_director" (
+    film_id INTEGER REFERENCES "film"(id) ON DELETE CASCADE,
+    director_id INTEGER REFERENCES "director"(id) ON DELETE CASCADE,
+    PRIMARY KEY (film_id, director_id)
 );
 
 

@@ -19,6 +19,7 @@ import ru.yandex.practicum.filmorate.service.FilmLikeService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/films")
@@ -66,4 +67,17 @@ public class FilmController {
     public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
         return likeService.getPopularFilms(count);
     }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmsByDirector(
+            @PathVariable int directorId,
+            @RequestParam(defaultValue = "year") String sortBy) {
+
+        if (!"year".equals(sortBy) && !"likes".equals(sortBy)) {
+            throw new IllegalArgumentException("Invalid sort parameter. Allowed values: [year, likes]");
+        }
+
+        return filmService.getFilmsByDirector(directorId, sortBy);
+    }
+
 }

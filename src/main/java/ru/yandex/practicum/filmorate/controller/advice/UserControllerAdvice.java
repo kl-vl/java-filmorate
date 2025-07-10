@@ -36,7 +36,7 @@ public class UserControllerAdvice {
     public ErrorResponse handleUserCreateFailed(UserCreateFailed ex, WebRequest request) {
         log.warn("User create failed in {}: {}", request.getDescription(false), ex.getMessage());
 
-        return new ErrorResponse(ex.getMessage(), "User_CREATE_FAILED");
+        return new ErrorResponse(ex.getMessage(), "USER_CREATE_FAILED");
     }
 
     @ExceptionHandler(UserValidationException.class)

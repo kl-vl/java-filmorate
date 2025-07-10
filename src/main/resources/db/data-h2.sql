@@ -1,9 +1,11 @@
 --del
 DELETE FROM "film_genre";
 DELETE FROM "film_like";
+DELETE FROM "film_director";
 DELETE FROM "friendship";
 DELETE FROM "user";
 DELETE FROM "film";
+DELETE FROM "director";
 
 -- clear ids
 ALTER TABLE "film" ALTER COLUMN id RESTART WITH 1;

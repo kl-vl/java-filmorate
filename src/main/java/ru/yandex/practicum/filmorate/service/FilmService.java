@@ -3,9 +3,11 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmCreateFailed;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.repository.DbDirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmService {
     private final FilmRepository repository;
+    private final DbDirectorRepository directorRepository;
 
     public Film getFilmById(Integer id) {
         return repository.getById(id).orElseThrow(() -> new FilmNotFoundException("Film not found"));
@@ -53,5 +56,12 @@ public class FilmService {
         log.debug("Film updated data: {}", updatedFilm);
 
         return updatedFilm;
+    }
+
+    public List<Film> getFilmsByDirector(int directorId, String sortBy) {
+        directorRepository.findById(directorId)
+                .orElseThrow(() -> new DirectorNotFoundException("Director not found with id: " + directorId));
+
+        return repository.findFilmsByDirectorId(directorId, sortBy);
     }
 }

@@ -20,6 +20,7 @@ import ru.yandex.practicum.filmorate.converter.DurationMinutesConverter;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -60,12 +61,12 @@ public class Film {
     private Mpa mpa;
 
     @Builder.Default
-    private Set<Genre> genres = newModifiableSet(); // Наш метод для создания изменяемого Set
+    private Set<Genre> genres = newModifiableSet();
 
     public void setGenres(Collection<Genre> genres) {
         this.genres.clear();
         if (genres != null) {
-            this.genres.addAll(new LinkedHashSet<>(genres)); // Гарантируем порядок
+            this.genres.addAll(new LinkedHashSet<>(genres));
         }
     }
 
@@ -77,9 +78,12 @@ public class Film {
         return new LinkedHashSet<>();
     }
 
+    @Builder.Default
+    private Set<Director> directors = new HashSet<>();
+
     // Light Film constructor to avoid all old mem tests changes
     public Film(Integer id, String name, String description, LocalDate releaseDate, Duration duration) {
-        this(id,name,description,releaseDate,duration,null,null);
+        this(id,name,description,releaseDate,duration,null,null,null);
     }
 
 }

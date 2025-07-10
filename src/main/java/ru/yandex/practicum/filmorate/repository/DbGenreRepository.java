@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class DbGenreRepository {
 
-    private static final String SQL_SELECT_GENRE_BY_ID = "SELECT * FROM \"genre\" WHERE id = ?";
+    private static final String SQL_SELECT_GENRE_BY_ID = "SELECT id as genre_id, name as genre_name FROM \"genre\" WHERE id = ?";
     private static final String SQL_SELECT_GENRE_BY_FILM_ID = """
-        SELECT g.id, g.name
+        SELECT g.id as genre_id, g.name as genre_name
         FROM "genre" g
         JOIN "film_genre" fg ON g.id = fg.genre_id
         WHERE fg.film_id = ?
@@ -27,7 +27,7 @@ public class DbGenreRepository {
         """;
     private static final String SQL_DELETE_FILM_GENRE_BY_FILM_ID = "DELETE FROM \"film_genre\" WHERE film_id = ?";
     private static final String SQL_INSERT_FILM_GENRE = "INSERT INTO \"film_genre\" (film_id, genre_id) VALUES (?, ?)";
-    private static final String SQL_SELECT_GENRE_ORDER_BY_ID = "SELECT * FROM \"genre\" ORDER BY id ASC";
+    private static final String SQL_SELECT_GENRE_ORDER_BY_ID = "SELECT id as genre_id, name as genre_name FROM \"genre\" ORDER BY id ASC";
 
     private final JdbcTemplate jdbcTemplate;
     private final GenreRowMapper genreRowMapper;

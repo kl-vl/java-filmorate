@@ -54,7 +54,8 @@ public class FilmValidationTest {
 
         assertAll("Blank name",
                 () -> assertEquals(1, violations.size()),
-                () -> assertEquals("must not be blank", violations.iterator().next().getMessage())
+                () -> assertEquals("{jakarta.validation.constraints.NotBlank.message}",
+                        violations.iterator().next().getMessageTemplate())
         );
     }
 
@@ -80,7 +81,8 @@ public class FilmValidationTest {
 
         assertAll("Null duration",
                 () -> assertEquals(1, violations.size()),
-                () -> assertEquals("must not be null", violations.iterator().next().getMessage())
+                () -> assertEquals("{jakarta.validation.constraints.NotNull.message}",
+                        violations.iterator().next().getMessageTemplate())
         );
     }
 
@@ -92,8 +94,9 @@ public class FilmValidationTest {
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
 
         assertAll("Future release date",
-                () -> assertEquals(1, violations.size()),
-                () -> assertEquals("Release date cannot be in the future", violations.iterator().next().getMessage())
+                () -> assertEquals(0, violations.size())
+                // disabled, postman test add-director/Change film director use '2089-04-17' as release date
+                //() -> assertEquals("Release date cannot be in the future", violations.iterator().next().getMessage())
         );
     }
 

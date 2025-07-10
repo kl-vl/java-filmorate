@@ -6,18 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.repository.DbDirectorRepository;
 import ru.yandex.practicum.filmorate.repository.DbFilmRepository;
 import ru.yandex.practicum.filmorate.repository.DbGenreRepository;
 import ru.yandex.practicum.filmorate.repository.DbMpaRepository;
 import ru.yandex.practicum.filmorate.repository.DbUserRepository;
+import ru.yandex.practicum.filmorate.repository.mappers.DirectorRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.MpaRowMapper;
@@ -31,6 +35,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -39,7 +44,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JdbcTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({DbUserRepository.class, DbFilmRepository.class, DbGenreRepository.class, DbMpaRepository.class, FilmRowMapper.class, UserRowMapper.class, GenreRowMapper.class, MpaRowMapper.class})
+@Import({DbUserRepository.class, DbFilmRepository.class, DbGenreRepository.class, DbMpaRepository.class, FilmRowMapper.class,
+        UserRowMapper.class, GenreRowMapper.class, MpaRowMapper.class, DbDirectorRepository.class, DirectorRowMapper.class})
 @Transactional
 class FilmorateApplicationTests {
 
@@ -58,10 +64,15 @@ class FilmorateApplicationTests {
     @Autowired
     private DbGenreRepository genreRepository;
 
+    @Autowired
+    private DbDirectorRepository directorRepository;
+
     private User testUser1;
     private User testUser2;
     private Film testFilm1;
     private Film testFilm2;
+    private Director director1;
+    private Director director2;
 
     @BeforeEach
     void setUp() {
@@ -105,6 +116,16 @@ class FilmorateApplicationTests {
         jdbcTemplate.execute("DELETE FROM \"friendship\"");
         jdbcTemplate.execute("DELETE FROM \"user\"");
         jdbcTemplate.execute("DELETE FROM \"film\"");
+        jdbcTemplate.execute("DELETE FROM \"director\"");
+        jdbcTemplate.execute("DELETE FROM \"film_director\"");
+
+        director1 = directorRepository.create(
+                Director.builder().name("Christopher Nolan").build()
+        ).orElseThrow();
+        director2 = directorRepository.create(
+                Director.builder().name("Quentin Tarantino").build()
+        ).orElseThrow();
+
     }
 
     @Test
@@ -282,4 +303,90 @@ class FilmorateApplicationTests {
         assertFalse(filmRepository.existsById(999));
     }
 
+    @Test
+    void findById_shouldReturnDirectorWhenExists() {
+        Optional<Director> result = directorRepository.findById(director1.getId());
+
+        assertAll(
+                () -> assertTrue(result.isPresent(), "Director should be present"),
+                () -> assertEquals(director1, result.get(), "Returned director should match expected")
+        );
+    }
+
+    @Test
+    void findById_shouldReturnEmptyWhenNotExists() {
+        Optional<Director> result = directorRepository.findById(999);
+
+        assertFalse(result.isPresent(), "Director should not be present");
+    }
+
+    @Test
+    void findAll_shouldReturnAllDirectors() {
+        List<Director> result = directorRepository.findAll();
+
+        assertEquals(2, result.size(), "Should return 2 directors");
+    }
+
+    @Test
+    void save_shouldCreateNewDirectorWithGeneratedId() {
+        Director newDirector = Director.builder()
+                .name("Martin Scorsese")
+                .build();
+
+        Director savedDirector = directorRepository.create(newDirector).orElseThrow();
+        Optional<Director> retrievedDirector = directorRepository.findById(savedDirector.getId());
+
+        assertAll(
+                () -> assertNotNull(savedDirector.getId(), "ID should be generated"),
+                () -> assertEquals(newDirector.getName(), savedDirector.getName(), "Names should match"),
+                () -> assertTrue(retrievedDirector.isPresent(), "Director should be retrievable"),
+                () -> assertEquals(savedDirector, retrievedDirector.get(), "Saved and retrieved directors should match")
+        );
+    }
+
+    @Test
+    void update_shouldModifyExistingDirector() {
+        Director updated = Director.builder()
+                .id(director1.getId())
+                .name("Chris Nolan")
+                .build();
+
+        Director result = directorRepository.update(updated).orElseThrow();
+        Optional<Director> retrieved = directorRepository.findById(director1.getId());
+
+        assertAll(
+                () -> assertEquals(updated, result, "Returned director should match updated"),
+                () -> assertTrue(retrieved.isPresent(), "Director should exist"),
+                () -> assertEquals("Chris Nolan", retrieved.get().getName(), "Name should be updated"),
+                () -> assertEquals(director1.getId(), retrieved.get().getId(), "ID should remain the same")
+        );
+    }
+
+    @Test
+    void deleteById_shouldRemoveDirector() {
+        boolean deleted = directorRepository.deleteById(director1.getId());
+        Optional<Director> result = directorRepository.findById(director1.getId());
+
+        assertAll(
+                () -> assertTrue(deleted, "Should return true when deleted"),
+                () -> assertFalse(result.isPresent(), "Director should not exist after deletion"),
+                () -> assertEquals(1, directorRepository.findAll().size(), "Should only have one director left")
+        );
+    }
+
+    @Test
+    void existsById_shouldReturnCorrectStatus() {
+        assertAll(
+                () -> assertTrue(directorRepository.existsById(director1.getId())),
+                () -> assertFalse(directorRepository.existsById(999))
+        );
+    }
+
+    @Test
+    void save_shouldThrowExceptionWhenNameIsNull() {
+        Director invalidDirector = Director.builder().name(null).build();
+
+        assertThrows(DataIntegrityViolationException.class,
+                () -> directorRepository.create(invalidDirector));
+    }
 }

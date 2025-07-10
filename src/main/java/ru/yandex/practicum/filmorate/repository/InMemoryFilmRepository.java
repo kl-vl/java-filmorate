@@ -99,4 +99,9 @@ public class InMemoryFilmRepository implements FilmRepository {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Film> findFilmsByDirectorId(int directorId, String sortBy) {
+        throw new UnsupportedOperationException("This method is not implemented.");
+    }
+
 }
