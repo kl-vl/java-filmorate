@@ -101,15 +101,28 @@ public class DbFilmRepository implements FilmRepository {
         m.name AS mpa_name,
         g.id AS genre_id,
         g.name AS genre_name,
-        COUNT(fl1.user_id) AS common_likes
+        (SELECT COUNT(*)
+          FROM "film_like" fl 
+          WHERE fl.film_id = f.id
+        ) AS popularity
     FROM "film" f
-    LEFT JOIN "mpa" m ON f.mpa_id = m.id
-    LEFT JOIN "film_genre" fg ON f.id = fg.film_id
-    LEFT JOIN "genre" g ON fg.genre_id = g.id
-    JOIN "film_like" fl1 ON f.id = fl1.film_id AND fl1.user_id = ?
-    JOIN "film_like" fl2 ON f.id = fl2.film_id AND fl2.user_id = ?
-    GROUP BY f.id, m.id, g.id
-    ORDER BY common_likes DESC
+    LEFT JOIN "mpa" m 
+      ON f.mpa_id = m.id
+    LEFT JOIN "film_genre" fg 
+      ON f.id = fg.film_id
+    LEFT JOIN "genre" g 
+      ON fg.genre_id = g.id
+    JOIN "film_like" fl1 
+      ON f.id = fl1.film_id 
+     AND fl1.user_id = ?
+    JOIN "film_like" fl2 
+      ON f.id = fl2.film_id 
+     AND fl2.user_id = ?
+    GROUP BY 
+        f.id, f.name, f.description, f.release_date, f.duration,
+        m.id, m.name,
+        g.id, g.name
+    ORDER BY popularity DESC
     """;
 
     private final JdbcTemplate jdbcTemplate;
