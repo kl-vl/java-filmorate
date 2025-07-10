@@ -18,7 +18,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FriendsService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.Collection;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -43,6 +43,11 @@ public class UserController {
             response.addHeader("Warning", "Server ignored client-provided ID");
         }
         return userService.create(user);
+    }
+
+    @GetMapping("/{userId}")
+    public User getUserById(@PathVariable Integer userId) {
+        return userService.getUserById(userId);
     }
 
     @PutMapping
@@ -74,7 +79,7 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeUserById(@PathVariable(name = "userId") Integer userId) {
+    public void removeUserById(@PathVariable Integer userId) {
         userService.removeUserById(userId);
     }
 

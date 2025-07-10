@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,6 +19,7 @@ public class FilmValidationTest {
 
     @BeforeAll
     static void setup() {
+        Locale.setDefault(Locale.US);
         validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 

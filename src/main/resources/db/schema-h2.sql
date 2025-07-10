@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 -- friendship
 CREATE TABLE IF NOT EXISTS "friendship" (
-    user_id INTEGER REFERENCES "user"(id),
-    friend_id INTEGER REFERENCES "user"(id),
+    user_id INTEGER REFERENCES "user"(id) ON DELETE CASCADE,
+    friend_id INTEGER REFERENCES "user"(id) ON DELETE CASCADE,
     accepted BOOLEAN DEFAULT true,
     PRIMARY KEY (user_id, friend_id),
     CONSTRAINT chk_user_friend_order CHECK (user_id <> friend_id)
@@ -51,14 +51,14 @@ CREATE INDEX IF NOT EXISTS idx_film_release_date ON "film"(release_date);
 
 -- film_likes
 CREATE TABLE IF NOT EXISTS "film_like" (
-    user_id INTEGER REFERENCES "user"(id),
-    film_id INTEGER REFERENCES "film"(id),
+    user_id INTEGER REFERENCES "user"(id) ON DELETE CASCADE,
+    film_id INTEGER REFERENCES "film"(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, film_id)
 );
 
 -- film_genre
 CREATE TABLE IF NOT EXISTS "film_genre" (
-    film_id INTEGER REFERENCES "film"(id),
+    film_id INTEGER REFERENCES "film"(id) ON DELETE CASCADE,
     genre_id INTEGER REFERENCES "genre"(id),
     PRIMARY KEY (film_id, genre_id)
 );

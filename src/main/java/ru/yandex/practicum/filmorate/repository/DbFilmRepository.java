@@ -150,6 +150,7 @@ public class DbFilmRepository implements FilmRepository {
     """;
 
     private static final String SQL_REMOVE_FILM_BY_ID = "DELETE FROM film WHERE id = ?";
+    private static final String SQL_REMOVE_FILM_BY_ID = "DELETE FROM \"film\" WHERE id = ?";
 
     private final JdbcTemplate jdbcTemplate;
     private final DbMpaRepository mpaRepository;

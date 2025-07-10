@@ -12,13 +12,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.DbDirectorRepository;
 import ru.yandex.practicum.filmorate.repository.DbFilmRepository;
 import ru.yandex.practicum.filmorate.repository.DbGenreRepository;
 import ru.yandex.practicum.filmorate.repository.DbMpaRepository;
@@ -436,6 +433,35 @@ class FilmorateApplicationTests {
                 .collect(Collectors.toSet());
         assertTrue(ids.contains(film1.getId()), "Должен быть Film 1");
         assertTrue(ids.contains(film2.getId()), "Должен быть Film 2");
+    }
+    @Test
+    void userDeleting_MustUndergoCheck() {
+        Optional<User> createUser = userRepository.create(testUser1);
+
+        Assertions.assertNotNull(createUser.get());
+
+        int userId = createUser.get().getId();
+
+        userRepository.removeUserById(userId);
+
+        Optional<User> optionalIsNull = userRepository.getById(userId);
+
+        Assertions.assertTrue(optionalIsNull.isEmpty());
+    }
+
+    @Test
+    void removal_OfFilmMustUndergoCheck() {
+        Optional<Film> createFilm = filmRepository.create(testFilm1);
+
+        Assertions.assertNotNull(createFilm.get());
+
+        int filmId = createFilm.get().getId();
+
+        filmRepository.removeFilmById(filmId);
+
+        Optional<Film> optionalIsEmpty = filmRepository.getById(filmId);
+
+        Assertions.assertTrue(optionalIsEmpty.isEmpty());
     }
 
     @Test
