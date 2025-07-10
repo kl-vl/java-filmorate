@@ -72,8 +72,8 @@ class UserValidationTest {
 
         assertAll("Null login",
                 () -> assertEquals(2, violations.size()),
-                () -> assertEquals("{jakarta.validation.constraints.NotNull.message}",
-                        violations.iterator().next().getMessageTemplate())
+                () -> assertTrue(violations.stream()
+                        .anyMatch(v -> "{jakarta.validation.constraints.NotNull.message}".equals(v.getMessageTemplate())))
         );
     }
 
