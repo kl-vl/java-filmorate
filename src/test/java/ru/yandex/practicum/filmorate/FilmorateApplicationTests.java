@@ -1,31 +1,31 @@
 package ru.yandex.practicum.filmorate;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.repository.DbDirectorRepository;
 import ru.yandex.practicum.filmorate.repository.DbFilmRepository;
 import ru.yandex.practicum.filmorate.repository.DbGenreRepository;
 import ru.yandex.practicum.filmorate.repository.DbMpaRepository;
 import ru.yandex.practicum.filmorate.repository.DbReviewRepository;
 import ru.yandex.practicum.filmorate.repository.DbUserRepository;
-import ru.yandex.practicum.filmorate.repository.mappers.DirectorRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.MpaRowMapper;
-import ru.yandex.practicum.filmorate.repository.mappers.ReviewRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.UserRowMapper;
 
 import java.time.Duration;
@@ -37,7 +37,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -613,4 +612,33 @@ class FilmorateApplicationTests {
         testReview3 = reviewRepository.create(review3).orElseThrow();
     }
 
+    @Test
+    void userDeleting_MustUndergoCheck() {
+        Optional<User> createUser = userRepository.create(testUser1);
+
+        Assertions.assertNotNull(createUser.get());
+
+        int userId = createUser.get().getId();
+
+        userRepository.removeUserById(userId);
+
+        Optional<User> optionalIsNull = userRepository.getById(userId);
+
+        Assertions.assertTrue(optionalIsNull.isEmpty());
+    }
+
+    @Test
+    void removal_OfFilmMustUndergoCheck() {
+        Optional<Film> createFilm = filmRepository.create(testFilm1);
+
+        Assertions.assertNotNull(createFilm.get());
+
+        int filmId = createFilm.get().getId();
+
+        filmRepository.removeFilmById(filmId);
+
+        Optional<Film> optionalIsEmpty = filmRepository.getById(filmId);
+
+        Assertions.assertTrue(optionalIsEmpty.isEmpty());
+    }
 }

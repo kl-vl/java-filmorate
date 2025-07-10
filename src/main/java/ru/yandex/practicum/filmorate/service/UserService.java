@@ -71,4 +71,5 @@ public class UserService {
 
         log.info("Удаление пользователя с ID: {} прошло успешно", userId);
     }
+
 }
