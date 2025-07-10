@@ -34,6 +34,13 @@ public class FilmController {
         return filmService.getList();
     }
 
+    @GetMapping("/common")
+    public Collection<Film> getCommonFilms(
+            @RequestParam("userId") Integer userId,
+            @RequestParam("friendId") Integer friendId) {
+        return likeService.getCommonFilms(userId, friendId);
+    }
+
     @GetMapping("/{id}")
     public Film getFilmById(@PathVariable Integer id) {
         return filmService.getFilmById(id);

@@ -33,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -388,5 +389,31 @@ class FilmorateApplicationTests {
 
         assertThrows(DataIntegrityViolationException.class,
                 () -> directorRepository.create(invalidDirector));
+    }
+    @Test
+    void getCommonFilms_ShouldReturnMutualLikedFilms() {
+        User user1 = userRepository.create(testUser1).orElseThrow();
+        User user2 = userRepository.create(testUser2).orElseThrow();
+
+        Film film1 = filmRepository.create(testFilm1).orElseThrow();
+        Film film2 = filmRepository.create(testFilm2).orElseThrow();
+
+        filmRepository.addLike(film1.getId(), user1.getId());
+        filmRepository.addLike(film2.getId(), user2.getId());
+
+        List<Film> noCommons = filmRepository.getCommonFilms(user1.getId(), user2.getId());
+        assertTrue(noCommons.isEmpty(), "Общих фильмов быть не должно");
+
+        filmRepository.addLike(film2.getId(), user1.getId());
+        filmRepository.addLike(film1.getId(), user2.getId());
+
+        List<Film> commons = filmRepository.getCommonFilms(user1.getId(), user2.getId());
+        assertEquals(2, commons.size(), "Должны быть 2 общих фильма");
+
+        Set<Integer> ids = commons.stream()
+                .map(Film::getId)
+                .collect(Collectors.toSet());
+        assertTrue(ids.contains(film1.getId()), "Должен быть Film 1");
+        assertTrue(ids.contains(film2.getId()), "Должен быть Film 2");
     }
 }

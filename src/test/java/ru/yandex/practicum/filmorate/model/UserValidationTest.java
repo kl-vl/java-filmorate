@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,6 @@ class UserValidationTest {
     static void setup() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-        Locale.setDefault(Locale.forLanguageTag("ru"));
     }
 
     @Test
@@ -182,5 +180,4 @@ class UserValidationTest {
                         "Missing date validation")
         );
     }
-
 }

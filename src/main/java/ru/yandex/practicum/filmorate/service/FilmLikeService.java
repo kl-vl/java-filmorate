@@ -49,4 +49,13 @@ public class FilmLikeService {
         return filmRepository.getPopularFilms(count);
     }
 
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException("Пользователь с ID=" + userId + " не найден");
+        }
+        if (!userRepository.existsById(friendId)) {
+            throw new UserNotFoundException("Пользователь с ID=" + friendId + " не найден");
+        }
+        return filmRepository.getCommonFilms(userId, friendId);
+    }
 }
