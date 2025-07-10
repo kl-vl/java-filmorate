@@ -100,10 +100,6 @@ public class InMemoryFilmRepository implements FilmRepository {
     }
 
     @Override
-    public boolean removeFilmById(Integer filmId) {
-        throw new UnsupportedOperationException();
-    }
-    @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         return List.of();
     }

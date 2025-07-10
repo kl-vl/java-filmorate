@@ -434,6 +434,7 @@ class FilmorateApplicationTests {
         assertTrue(ids.contains(film1.getId()), "Должен быть Film 1");
         assertTrue(ids.contains(film2.getId()), "Должен быть Film 2");
     }
+
     @Test
     void userDeleting_MustUndergoCheck() {
         Optional<User> createUser = userRepository.create(testUser1);

@@ -149,7 +149,6 @@ public class DbFilmRepository implements FilmRepository {
     ORDER BY popularity DESC
     """;
 
-    private static final String SQL_REMOVE_FILM_BY_ID = "DELETE FROM film WHERE id = ?";
     private static final String SQL_REMOVE_FILM_BY_ID = "DELETE FROM \"film\" WHERE id = ?";
 
     private final JdbcTemplate jdbcTemplate;
