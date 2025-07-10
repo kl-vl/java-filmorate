@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -71,7 +72,8 @@ class UserValidationTest {
 
         assertAll("Null login",
                 () -> assertEquals(2, violations.size()),
-                () -> assertTrue(violations.iterator().next().getMessage().contains("must not be"))
+                () -> assertEquals("{jakarta.validation.constraints.NotNull.message}",
+                        violations.iterator().next().getMessageTemplate())
         );
     }
 
@@ -95,7 +97,8 @@ class UserValidationTest {
 
         assertAll("Future birthday",
                 () -> assertEquals(1, violations.size()),
-                () -> assertEquals("must be a date in the past or in the present", violations.iterator().next().getMessage())
+                () -> assertEquals("{jakarta.validation.constraints.PastOrPresent.message}",
+                        violations.iterator().next().getMessageTemplate())
         );
     }
 
@@ -107,7 +110,8 @@ class UserValidationTest {
 
         assertAll("Null birthday",
                 () -> assertEquals(1, violations.size()),
-                () -> assertEquals("must not be null", violations.iterator().next().getMessage())
+                () -> assertEquals("{jakarta.validation.constraints.NotNull.message}",
+                        violations.iterator().next().getMessageTemplate())
         );
     }
 
@@ -151,14 +155,29 @@ class UserValidationTest {
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
-        assertAll("All validation errors",
-                () -> assertEquals(5, violations.size()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("User ID must be positive number"))),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("Login must not be blank"))),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("must not be null"))),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("Not valid email format"))),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("must be a date in the past or in the present")))
-                );
-    }
+        Set<String> messageTemplates = violations.stream()
+                .map(ConstraintViolation::getMessageTemplate)
+                .collect(Collectors.toSet());
 
+        Set<String> messages = violations.stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.toSet());
+
+        assertAll("All validation errors",
+                () -> assertEquals(5, violations.size(),
+                        "Should detect 5 validation errors"),
+
+                () -> assertTrue(messages.contains("User ID must be positive number"),
+                        "Missing positive ID validation"),
+                () -> assertTrue(messages.contains("Login must not be blank"),
+                        "Missing blank login validation"),
+                () -> assertTrue(messages.contains("Not valid email format"),
+                        "Missing email format validation"),
+
+                () -> assertTrue(messageTemplates.contains("{jakarta.validation.constraints.NotNull.message}"),
+                        "Missing not null validation"),
+                () -> assertTrue(messageTemplates.contains("{jakarta.validation.constraints.PastOrPresent.message}"),
+                        "Missing date validation")
+        );
+    }
 }

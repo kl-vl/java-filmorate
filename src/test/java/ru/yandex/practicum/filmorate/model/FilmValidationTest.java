@@ -54,7 +54,8 @@ public class FilmValidationTest {
 
         assertAll("Blank name",
                 () -> assertEquals(1, violations.size()),
-                () -> assertEquals("must not be blank", violations.iterator().next().getMessage())
+                () -> assertEquals("{jakarta.validation.constraints.NotBlank.message}",
+                        violations.iterator().next().getMessageTemplate())
         );
     }
 
@@ -80,7 +81,8 @@ public class FilmValidationTest {
 
         assertAll("Null duration",
                 () -> assertEquals(1, violations.size()),
-                () -> assertEquals("must not be null", violations.iterator().next().getMessage())
+                () -> assertEquals("{jakarta.validation.constraints.NotNull.message}",
+                        violations.iterator().next().getMessageTemplate())
         );
     }
 

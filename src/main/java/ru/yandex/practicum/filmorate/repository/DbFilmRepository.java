@@ -90,6 +90,28 @@ public class DbFilmRepository implements FilmRepository {
             LIMIT ?
             """;
 
+    private static final String SQL_SELECT_COMMON_FILMS = """
+    SELECT
+        f.id AS film_id,
+        f.name,
+        f.description,
+        f.release_date,
+        f.duration,
+        m.id AS mpa_id,
+        m.name AS mpa_name,
+        g.id AS genre_id,
+        g.name AS genre_name,
+        (SELECT COUNT(*) FROM "film_like" fl WHERE fl.film_id = f.id) AS popularity
+    FROM "film" f
+    LEFT JOIN "mpa" m ON f.mpa_id = m.id
+    LEFT JOIN "film_genre" fg ON f.id = fg.film_id
+    LEFT JOIN "genre" g ON fg.genre_id = g.id
+    JOIN "film_like" fl1 ON f.id = fl1.film_id AND fl1.user_id = ?
+    JOIN "film_like" fl2 ON f.id = fl2.film_id AND fl2.user_id = ?
+    GROUP BY f.id, f.name, f.description, f.release_date, f.duration, m.id, m.name, g.id, g.name
+    ORDER BY popularity DESC
+    """;
+
     private final JdbcTemplate jdbcTemplate;
     private final DbMpaRepository mpaRepository;
     private final DbGenreRepository genreRepository;
@@ -313,6 +335,34 @@ public class DbFilmRepository implements FilmRepository {
         return new ArrayList<>(filmMap.values());
     }
 
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        Map<Integer, Film> filmMap = new LinkedHashMap<>();
+        jdbcTemplate.query(SQL_SELECT_COMMON_FILMS, rs -> {
+            int id = rs.getInt("film_id");
+            Film film = filmMap.get(id);
+            if (film == null) {
+                film = Film.builder()
+                        .id(id)
+                        .name(rs.getString("name"))
+                        .description(rs.getString("description"))
+                        .releaseDate(rs.getDate("release_date").toLocalDate())
+                        .duration(Duration.ofMinutes(rs.getInt("duration")))
+                        .mpa(new Mpa(rs.getInt("mpa_id"), rs.getString("mpa_name")))
+                        .genres(new LinkedHashSet<>())
+                        .build();
+                filmMap.put(id, film);
+            }
+            if (rs.getObject("genre_id") != null) {
+                film.addGenre(new Genre(
+                        rs.getInt("genre_id"),
+                        rs.getString("genre_name")
+                ));
+            }
+        }, userId, friendId);
+        return new ArrayList<>(filmMap.values());
+    }
+
     public boolean addLike(Integer filmId, Integer userId) {
         try {
             int updated = jdbcTemplate.update(
@@ -335,5 +385,4 @@ public class DbFilmRepository implements FilmRepository {
         );
         return updated > 0;
     }
-
 }
