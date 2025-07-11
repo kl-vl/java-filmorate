@@ -59,6 +59,8 @@ public class UserService {
     }
 
     public void removeUserById(Integer userId) {
+        log.info("Удаление пользователя с ID: {}", userId);
+
         if (userId == null) {
             throw new UserValidationException("ID пользователя должен быть указан");
         }
@@ -66,5 +68,7 @@ public class UserService {
         if (!repository.removeUserById(userId)) {
             throw new UserNotFoundException("Пользователь с id { " + userId + " } - не найден");
         }
+
+        log.info("Удаление пользователя с ID: {} прошло успешно", userId);
     }
 }

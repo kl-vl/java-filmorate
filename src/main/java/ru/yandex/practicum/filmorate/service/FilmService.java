@@ -65,6 +65,8 @@ public class FilmService {
     }
 
     public void removeFilmById(Integer filmId) {
+        log.info("Удаление фильма с ID: {}", filmId);
+
         if (filmId == null) {
             throw new FilmValidationException("ID фильма должно быть указано");
         }
@@ -72,5 +74,8 @@ public class FilmService {
         if (!repository.removeFilmById(filmId)) {
             throw new FilmNotFoundException("Фильм с id { " + filmId + " } - не найден");
         }
+        repository.removeFilmById(filmId);
+
+        log.info("Удаление фильма с ID: {} прошло успешно", filmId);
     }
 }
