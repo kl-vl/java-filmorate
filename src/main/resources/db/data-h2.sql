@@ -10,6 +10,7 @@ DELETE FROM "director";
 -- clear ids
 ALTER TABLE "film" ALTER COLUMN id RESTART WITH 1;
 ALTER TABLE "user" ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE "director" ALTER COLUMN id RESTART WITH 1;
 
 -- genre
 MERGE INTO "genre" (id, name)
