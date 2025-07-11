@@ -21,12 +21,6 @@ public class ReleaseDateValidator implements ConstraintValidator<ValidReleaseDat
             return false;
         }
 
-//        if (value.isAfter(LocalDate.now())) {
-//            context.disableDefaultConstraintViolation();
-//            context.buildConstraintViolationWithTemplate("Release date cannot be in the future").addConstraintViolation();
-//            return false;
-//        }
-
         return true;
     }
 
