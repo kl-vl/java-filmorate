@@ -352,7 +352,7 @@ class FilmorateApplicationTests {
         createReviews();
         Review review = testReview1;
         review.setContent("Very Good film");
-        testReview1 = reviewRepository.update(review);
+        testReview1 = reviewRepository.update(review).orElseThrow();
 
         Assertions.assertThat(testReview1).isNotNull()
                 .hasFieldOrPropertyWithValue("content", "Very Good film");
@@ -461,7 +461,7 @@ class FilmorateApplicationTests {
                 .userId(user3.getId())
                 .isPositive(true)
                 .build();
-        testReview1 = reviewRepository.create(review1);
+        testReview1 = reviewRepository.create(review1).orElseThrow();
 
         Film film2 = filmRepository.create(testFilm2).orElseThrow();
         Review review2 = Review.builder()
@@ -470,7 +470,7 @@ class FilmorateApplicationTests {
                 .userId(user3.getId())
                 .isPositive(false)
                 .build();
-        testReview2 = reviewRepository.create(review2);
+        testReview2 = reviewRepository.create(review2).orElseThrow();
 
         Review review3 = Review.builder()
                 .content("Not Bad film")
@@ -478,7 +478,7 @@ class FilmorateApplicationTests {
                 .userId(user2.getId())
                 .isPositive(true)
                 .build();
-        testReview3 = reviewRepository.create(review3);
+        testReview3 = reviewRepository.create(review3).orElseThrow();
     }
 
 }

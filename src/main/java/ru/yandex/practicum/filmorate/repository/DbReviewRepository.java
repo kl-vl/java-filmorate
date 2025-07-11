@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,7 +17,6 @@ import java.util.Optional;
 @Primary
 @Repository
 @RequiredArgsConstructor
-@Slf4j
 public class DbReviewRepository {
     private static final String SQL_SELECT_BY_ID = "SELECT * FROM \"review\" WHERE id = ?";
     private static final String SQL_INSERT_REVIEW = "INSERT INTO \"review\" (content, is_positive, user_id, film_id, useful) " +
@@ -57,10 +55,9 @@ public class DbReviewRepository {
     private final JdbcTemplate jdbcTemplate;
     private final ReviewRowMapper reviewRowMapper;
 
-    public Review create(Review review) {
-        log.info("репозиторий - create");
+    public Optional<Review> create(Review review) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
+        int rows = jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(SQL_INSERT_REVIEW, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, review.getContent());
             ps.setBoolean(2, review.getIsPositive());
@@ -69,19 +66,18 @@ public class DbReviewRepository {
             return ps;
         }, keyHolder);
 
-        if (keyHolder.getKey() != null) {
-            review.setReviewId(keyHolder.getKeyAs(Integer.class));
-            review.setUseful(0);
-        } else {
-            throw new RuntimeException("Не удалось сохранить данные");
+        if (rows == 0 || keyHolder.getKey() == null) {
+            return Optional.empty();
         }
-        return review;
+        review.setReviewId(keyHolder.getKeyAs(Integer.class));
+        review.setUseful(0);
+
+        return Optional.of(review);
     }
 
-    public Review update(Review review) {
-        log.info("репозиторий - update");
+    public Optional<Review> update(Review review) {
         Integer id = review.getReviewId();
-        jdbcTemplate.update(
+        int rows = jdbcTemplate.update(
                 SQL_UPDATE_REVIEW,
                 review.getContent(),
                 review.getIsPositive(),
@@ -89,11 +85,11 @@ public class DbReviewRepository {
                 review.getFilmId(),
                 id
         );
-        return getReviewById(id).get();
+        Optional<Review> optReview = getReviewById(id);
+        return optReview.isPresent() ? optReview : Optional.empty();
     }
 
     public Optional<Review> getReviewById(Integer id) {
-        log.info("репозиторий - getReviewById {}", id);
         try {
             Review review = jdbcTemplate.queryForObject(SQL_SELECT_BY_ID, reviewRowMapper, id);
             return Optional.ofNullable(review);
@@ -102,40 +98,36 @@ public class DbReviewRepository {
         }
     }
 
-    public void deleteReview(Integer id) {
-        log.info("репозиторий - deleteReview {}", id);
-        int rowsDeleted = jdbcTemplate.update(SQL_DELETE_REVIEW, id);
+    public boolean deleteReview(Integer id) {
+        int rows = jdbcTemplate.update(SQL_DELETE_REVIEW, id);
+        return rows > 0;
     }
 
     public List<Review> getAllWithLimit(Integer limit) {
-        log.info("репозиторий - getAllWithLimit {}", limit);
         return jdbcTemplate.query(SQL_SELECT_ALL_REVIEW_WITH_LIMIT, reviewRowMapper, limit);
     }
 
     public List<Review> getAllByFilmIdWithLimit(Integer filmId, Integer limit) {
-        log.info("репозиторий - getAllByFilmIdWithLimit filmId = {}, limit = {}", filmId, limit);
         return jdbcTemplate.query(SQL_SELECT_ALL_REVIEW_BY_FILM_WITH_LIMIT, reviewRowMapper, filmId, limit);
     }
 
-    public void like(Integer userId, Integer reviewId, Integer add) {
-        log.info("репозиторий - like userId = {}, reviewId = {}, add = {}", userId, reviewId, add);
-        Integer i = jdbcTemplate.update(
+    public boolean like(Integer userId, Integer reviewId, Integer add) {
+        jdbcTemplate.update(
                 SQL_MERGE_REVIEW_LIKES_SET_LIKE_DISLIKE,
                 userId,
                 reviewId,
                 true,
                 false
         );
-        log.info("репозиторий - like i = {}", i);
-        jdbcTemplate.update(
+        int rows = jdbcTemplate.update(
                 SQL_UPDATE_REVIEW_USEFUL,
                 add,
                 reviewId
         );
+        return rows > 0;
     }
 
-    public void dislike(Integer userId, Integer reviewId, Integer deduct) {
-        log.info("репозиторий - dislike userId = {}, reviewId = {}, deduct = {}", userId, reviewId, deduct);
+    public boolean dislike(Integer userId, Integer reviewId, Integer deduct) {
         jdbcTemplate.update(
                 SQL_MERGE_REVIEW_LIKES_SET_LIKE_DISLIKE,
                 userId,
@@ -143,43 +135,43 @@ public class DbReviewRepository {
                 false,
                 true
         );
-        jdbcTemplate.update(
+        int rows = jdbcTemplate.update(
                 SQL_UPDATE_REVIEW_USEFUL,
                 -deduct,
                 reviewId
         );
+        return rows > 0;
     }
 
-    public void likeOff(Integer userId, Integer reviewId) {
-        log.info("репозиторий - likeOff userId = {}, reviewId = {}", userId, reviewId);
+    public boolean likeOff(Integer userId, Integer reviewId) {
         jdbcTemplate.update(
                 SQL_MERGE_REVIEW_LIKES_OFF_LIKE,
                 userId,
                 reviewId
         );
-        jdbcTemplate.update(
+        int rows = jdbcTemplate.update(
                 SQL_UPDATE_REVIEW_USEFUL,
                 -1,
                 reviewId
         );
+        return rows > 0;
     }
 
-    public void dislikeOff(Integer userId, Integer reviewId) {
-        log.info("репозиторий - dislikeOff userId = {}, reviewId = {}", userId, reviewId);
+    public boolean dislikeOff(Integer userId, Integer reviewId) {
         jdbcTemplate.update(
                 SQL_MERGE_REVIEW_LIKES_OFF_DISLIKE,
                 userId,
                 reviewId
         );
-        jdbcTemplate.update(
+        int rows = jdbcTemplate.update(
                 SQL_UPDATE_REVIEW_USEFUL,
                 1,
                 reviewId
         );
+        return rows > 0;
     }
 
     public boolean isLike(Integer userId, Integer reviewId) {
-        log.info("репозиторий - isLike userId = {}, reviewId = {}", userId, reviewId);
         try {
             boolean res = jdbcTemplate.queryForObject(
                     SQL_SELECT_REVIEW_LIKES_LIKE,
@@ -195,7 +187,6 @@ public class DbReviewRepository {
     }
 
     public boolean isDislike(Integer userId, Integer reviewId) {
-        log.info("репозиторий - isDislike userId = {}, reviewId = {}", userId, reviewId);
         try {
             boolean res = jdbcTemplate.queryForObject(
                     SQL_SELECT_REVIEW_LIKES_DISLIKE,

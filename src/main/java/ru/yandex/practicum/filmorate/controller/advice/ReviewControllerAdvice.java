@@ -9,20 +9,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import ru.yandex.practicum.filmorate.controller.ReviewController;
 import ru.yandex.practicum.filmorate.dto.error.ErrorResponse;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ReviewValidationException;
 
 @Slf4j
 @RestControllerAdvice(assignableTypes = ReviewController.class)
 public class ReviewControllerAdvice {
 
-    @ExceptionHandler({NotFoundException.class})
+    @ExceptionHandler({ReviewNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFound(final NotFoundException e, WebRequest request) {
+    public ErrorResponse handleNotFound(final ReviewNotFoundException e, WebRequest request) {
         return new ErrorResponse(e.getMessage(), "REVIEW_NOT_FOUND");
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, ValidationException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, ReviewValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleParameterNotValid(final RuntimeException e, WebRequest request) {
         return new ErrorResponse(e.getMessage(), "REVIEW_INVALID_DATA");
