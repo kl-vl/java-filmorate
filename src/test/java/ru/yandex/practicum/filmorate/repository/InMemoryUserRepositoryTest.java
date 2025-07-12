@@ -188,6 +188,4 @@ class InMemoryUserRepositoryTest {
                 () -> assertEquals(3, commonFriends.get(0))
         );
     }
-
-
 }

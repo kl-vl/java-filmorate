@@ -20,6 +20,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
 
+
 @Slf4j
 @RestController
 @RequestMapping("/users")
@@ -43,6 +44,11 @@ public class UserController {
             response.addHeader("Warning", "Server ignored client-provided ID");
         }
         return userService.create(user);
+    }
+
+    @GetMapping("/{userId}")
+    public User getUserById(@PathVariable Integer userId) {
+        return userService.getUserById(userId);
     }
 
     @PutMapping
@@ -70,6 +76,12 @@ public class UserController {
     @GetMapping("/{userId}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable Integer userId, @PathVariable Integer otherId) {
         return friendsService.getCommonFriends(userId, otherId);
+    }
+
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeUserById(@PathVariable Integer userId) {
+        userService.removeUserById(userId);
     }
 
 }

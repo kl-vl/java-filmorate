@@ -109,4 +109,8 @@ public class InMemoryFilmRepository implements FilmRepository {
         throw new UnsupportedOperationException("This method is not implemented.");
     }
 
+    @Override
+    public boolean removeFilmById(Integer filmId) {
+        throw new UnsupportedOperationException();
+    }
 }
