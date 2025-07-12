@@ -434,6 +434,36 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    void userDeleting_MustUndergoCheck() {
+        Optional<User> createUser = userRepository.create(testUser1);
+
+        assertNotNull(createUser.get());
+
+        int userId = createUser.get().getId();
+
+        userRepository.removeUserById(userId);
+
+        Optional<User> optionalIsNull = userRepository.getById(userId);
+
+        assertTrue(optionalIsNull.isEmpty());
+    }
+
+    @Test
+    void removal_OfFilmMustUndergoCheck() {
+        Optional<Film> createFilm = filmRepository.create(testFilm1);
+
+        assertNotNull(createFilm.get());
+
+        int filmId = createFilm.get().getId();
+
+        filmRepository.removeFilmById(filmId);
+
+        Optional<Film> optionalIsEmpty = filmRepository.getById(filmId);
+
+        assertTrue(optionalIsEmpty.isEmpty());
+    }
+
+    @Test
     void shouldCreateReview() {
         createReviews();
 

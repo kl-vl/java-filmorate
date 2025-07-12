@@ -127,6 +127,8 @@ public class DbFilmRepository implements FilmRepository {
     """;
     private static String SQL_INSERT_FILM_LIKE = "INSERT INTO \"film_like\" (film_id, user_id) VALUES (?, ?)";
 
+    private static final String SQL_REMOVE_FILM_BY_ID = "DELETE FROM \"film\" WHERE id = ?";
+
     private static final String SQL_SELECT_COMMON_FILMS = """
     SELECT
         f.id AS film_id,
