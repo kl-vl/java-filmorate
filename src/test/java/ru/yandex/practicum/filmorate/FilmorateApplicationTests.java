@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +14,17 @@ import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.DbFilmRepository;
 import ru.yandex.practicum.filmorate.repository.DbGenreRepository;
 import ru.yandex.practicum.filmorate.repository.DbMpaRepository;
+import ru.yandex.practicum.filmorate.repository.DbReviewRepository;
 import ru.yandex.practicum.filmorate.repository.DbUserRepository;
 import ru.yandex.practicum.filmorate.repository.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.MpaRowMapper;
+import ru.yandex.practicum.filmorate.repository.mappers.ReviewRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.UserRowMapper;
 
 import java.time.Duration;
@@ -40,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JdbcTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({DbUserRepository.class, DbFilmRepository.class, DbGenreRepository.class, DbMpaRepository.class, FilmRowMapper.class, UserRowMapper.class, GenreRowMapper.class, MpaRowMapper.class})
+@Import({DbUserRepository.class, DbFilmRepository.class, DbGenreRepository.class, DbMpaRepository.class, FilmRowMapper.class, UserRowMapper.class, GenreRowMapper.class, MpaRowMapper.class, DbReviewRepository.class, ReviewRowMapper.class})
 @Transactional
 class FilmorateApplicationTests {
 
@@ -59,10 +63,19 @@ class FilmorateApplicationTests {
     @Autowired
     private DbGenreRepository genreRepository;
 
+    @Autowired
+    private DbReviewRepository reviewRepository;
+
     private User testUser1;
     private User testUser2;
+    private User testUser3;
     private Film testFilm1;
     private Film testFilm2;
+
+    private Review testReview1;
+    private Review testReview2;
+
+    private Review testReview3;
 
     @BeforeEach
     void setUp() {
@@ -80,19 +93,26 @@ class FilmorateApplicationTests {
                 .birthday(LocalDate.of(2002, 2, 2))
                 .build();
 
-        testFilm1 =  Film.builder()
-                    .name("Test Film 1")
-                    .description("Test Description 1")
-                    .releaseDate(LocalDate.of(2001, 1, 1))
-                    .duration(Duration.ofMinutes(121))
-                    .mpa(mpaRepository.getMpaById(1).orElseThrow())
-                    .genres(Set.of(
-                            new Genre(1, "Комедия"),
-                            new Genre(2, "Драма")
-                    ))
-                    .build();
+        testUser3 = User.builder()
+                .email("test3@mail.com")
+                .login("testLogin3")
+                .name("Test Name 3")
+                .birthday(LocalDate.of(2003, 3, 3))
+                .build();
 
-        testFilm2 =  Film.builder()
+        testFilm1 = Film.builder()
+                .name("Test Film 1")
+                .description("Test Description 1")
+                .releaseDate(LocalDate.of(2001, 1, 1))
+                .duration(Duration.ofMinutes(121))
+                .mpa(mpaRepository.getMpaById(1).orElseThrow())
+                .genres(Set.of(
+                        new Genre(1, "Комедия"),
+                        new Genre(2, "Драма")
+                ))
+                .build();
+
+        testFilm2 = Film.builder()
                 .name("Test Film 2")
                 .description("Test Description 2")
                 .releaseDate(LocalDate.of(2002, 2, 2))
@@ -101,11 +121,14 @@ class FilmorateApplicationTests {
                 .genres(new LinkedHashSet<>())
                 .build();
 
+
         jdbcTemplate.execute("DELETE FROM \"film_genre\"");
         jdbcTemplate.execute("DELETE FROM \"film_like\"");
         jdbcTemplate.execute("DELETE FROM \"friendship\"");
+        jdbcTemplate.execute("DELETE FROM \"review_likes\"");
         jdbcTemplate.execute("DELETE FROM \"user\"");
         jdbcTemplate.execute("DELETE FROM \"film\"");
+        jdbcTemplate.execute("DELETE FROM \"review\"");
     }
 
     @Test
@@ -260,7 +283,7 @@ class FilmorateApplicationTests {
         assertFalse(filmRepository.removeLike(film.getId(), user1.getId())); // Уже удален
     }
 
-   @Test
+    @Test
     void validateMpa_ShouldThrowWhenInvalid() {
         testFilm1.setMpa(new Mpa(999, "Invalid"));
 
@@ -309,4 +332,153 @@ class FilmorateApplicationTests {
         assertTrue(ids.contains(film1.getId()), "Должен быть Film 1");
         assertTrue(ids.contains(film2.getId()), "Должен быть Film 2");
     }
+
+    @Test
+    void shouldCreateReview() {
+        createReviews();
+
+        Assertions.assertThat(testReview1).isNotNull()
+                .hasFieldOrPropertyWithValue("content", "Good film")
+                .hasFieldOrPropertyWithValue("isPositive", true)
+                .hasFieldOrPropertyWithValue("useful", 0)
+                .hasFieldOrPropertyWithValue("userId", testUser3.getId())
+                .hasFieldOrPropertyWithValue("filmId", testFilm1.getId());
+        assertThat(testReview1.getReviewId()).isNotNull();
+
+    }
+
+    @Test
+    public void shouldUpdateReview() {
+        createReviews();
+        Review review = testReview1;
+        review.setContent("Very Good film");
+        testReview1 = reviewRepository.update(review).orElseThrow();
+
+        Assertions.assertThat(testReview1).isNotNull()
+                .hasFieldOrPropertyWithValue("content", "Very Good film");
+    }
+
+    @Test
+    public void shouldGetReviewById() {
+        createReviews();
+        Review review = reviewRepository.getReviewById(2).orElseThrow();
+
+        Assertions.assertThat(review).isNotNull()
+                .hasFieldOrPropertyWithValue("content", "Bad film");
+    }
+
+    @Test
+    public void shouldDeleteReview() {
+        createReviews();
+        Optional<Review> optReview = reviewRepository.getReviewById(2);
+
+        assertTrue(optReview.isPresent());
+
+        reviewRepository.deleteReview(2);
+        optReview = reviewRepository.getReviewById(2);
+
+        assertTrue(optReview.isEmpty());
+    }
+
+    @Test
+    public void shouldGetAllReviews() {
+        createReviews();
+        Integer filmId = testFilm2.getId();
+        List<Review> reviewList = reviewRepository.getAllByFilmIdWithLimit(filmId, 10);
+
+        assertEquals(2, reviewList.size());
+
+        Review review = reviewList.get(0);
+        System.out.println(review.toString());
+
+        Assertions.assertThat(review).isNotNull()
+                .hasFieldOrPropertyWithValue("content", "Bad film")
+                .hasFieldOrPropertyWithValue("isPositive", false)
+                .hasFieldOrPropertyWithValue("useful", 0)
+                .hasFieldOrPropertyWithValue("userId", testUser3.getId())
+                .hasFieldOrPropertyWithValue("filmId", testFilm2.getId());
+
+        review = reviewList.get(1);
+
+        Assertions.assertThat(review).isNotNull()
+                .hasFieldOrPropertyWithValue("content", "Not Bad film")
+                .hasFieldOrPropertyWithValue("isPositive", true)
+                .hasFieldOrPropertyWithValue("useful", 0)
+                .hasFieldOrPropertyWithValue("userId", testUser2.getId())
+                .hasFieldOrPropertyWithValue("filmId", testFilm2.getId());
+    }
+
+    @Test
+    public void shouldLikeDislike() {
+        createReviews();
+        Integer reviewId1 = testReview1.getReviewId();
+        Review review = reviewRepository.getReviewById(reviewId1).orElseThrow();
+
+        assertEquals(0, review.getUseful());
+
+        // первый лайк
+        reviewRepository.like(testUser1.getId(), reviewId1, 1);
+        review = reviewRepository.getReviewById(reviewId1).orElseThrow();
+
+        assertEquals(1, review.getUseful());
+
+        // второй лайк
+        reviewRepository.like(testUser2.getId(), reviewId1, 1);
+        review = reviewRepository.getReviewById(reviewId1).orElseThrow();
+
+        assertEquals(2, review.getUseful());
+
+        // дизлайк
+        reviewRepository.dislike(testUser2.getId(), reviewId1, 1);
+        review = reviewRepository.getReviewById(reviewId1).orElseThrow();
+
+        assertEquals(1, review.getUseful());
+
+        // снял дизлайк
+        reviewRepository.dislikeOff(testUser2.getId(), reviewId1);
+        review = reviewRepository.getReviewById(reviewId1).orElseThrow();
+
+        assertEquals(2, review.getUseful());
+
+        // снял лайк
+        reviewRepository.likeOff(testUser1.getId(), reviewId1);
+        review = reviewRepository.getReviewById(reviewId1).orElseThrow();
+
+        assertEquals(1, review.getUseful());
+    }
+
+    private void createReviews() {
+        jdbcTemplate.update("ALTER TABLE \"user\" ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE \"film\" ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE \"review\" ALTER COLUMN id RESTART WITH 1");
+        User user3 = userRepository.create(testUser3).orElseThrow();
+        User user2 = userRepository.create(testUser2).orElseThrow();
+        User user1 = userRepository.create(testUser1).orElseThrow();
+        Film film1 = filmRepository.create(testFilm1).orElseThrow();
+        Review review1 = Review.builder()
+                .content("Good film")
+                .filmId(film1.getId())
+                .userId(user3.getId())
+                .isPositive(true)
+                .build();
+        testReview1 = reviewRepository.create(review1).orElseThrow();
+
+        Film film2 = filmRepository.create(testFilm2).orElseThrow();
+        Review review2 = Review.builder()
+                .content("Bad film")
+                .filmId(film2.getId())
+                .userId(user3.getId())
+                .isPositive(false)
+                .build();
+        testReview2 = reviewRepository.create(review2).orElseThrow();
+
+        Review review3 = Review.builder()
+                .content("Not Bad film")
+                .filmId(film2.getId())
+                .userId(user2.getId())
+                .isPositive(true)
+                .build();
+        testReview3 = reviewRepository.create(review3).orElseThrow();
+    }
+
 }
