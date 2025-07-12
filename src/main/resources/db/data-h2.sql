@@ -2,15 +2,18 @@
 DELETE FROM "film_genre";
 DELETE FROM "film_like";
 DELETE FROM "film_director";
+DELETE FROM "review_likes";
 DELETE FROM "friendship";
 DELETE FROM "user";
 DELETE FROM "film";
 DELETE FROM "director";
+DELETE FROM "review";
 
 -- clear ids
 ALTER TABLE "film" ALTER COLUMN id RESTART WITH 1;
 ALTER TABLE "user" ALTER COLUMN id RESTART WITH 1;
 ALTER TABLE "director" ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE "review" ALTER COLUMN id RESTART WITH 1;
 
 -- genre
 MERGE INTO "genre" (id, name)
