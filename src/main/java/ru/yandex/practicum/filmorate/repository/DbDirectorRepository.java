@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.mappers.DirectorRowMapper;
@@ -20,13 +21,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Primary
-@Repository
+@Repository("dbDirectorRepository")
 @RequiredArgsConstructor
 public class DbDirectorRepository {
 
-    private static final String SQL_SELECT_DIRECTOR_BY_ID = "SELECT id as director_id, name as director_name FROM \"director\" WHERE id = ?";
+    private static final String SQL_SELECT_DIRECTOR_BY_ID = "SELECT id AS director_id, name AS director_name FROM \"director\" WHERE id = ? ORDER BY name";
     private static final String SQL_SELECT_DIRECTOR_BY_FILM_ID = """
-        SELECT d.id as director_id, d.name as director_name
+        SELECT d.id AS director_id, d.name AS director_name
         FROM "director" d
         JOIN "film_director" fd ON d.id = fd.director_id
         WHERE fd.film_id = ?
@@ -34,7 +35,7 @@ public class DbDirectorRepository {
         """;
     private static final String SQL_DELETE_FILM_DIRECTOR_BY_FILM_ID = "DELETE FROM \"film_director\" WHERE film_id = ?";
     private static final String SQL_INSERT_FILM_DIRECTOR = "INSERT INTO \"film_director\" (film_id, director_id) VALUES (?, ?)";
-    private static final String SQL_SELECT_DIRECTOR_ORDER_BY_ID = "SELECT id as director_id, name as director_name FROM \"director\" ORDER BY id ASC";
+    private static final String SQL_SELECT_DIRECTOR_ORDER_BY_ID = "SELECT id AS director_id, name AS director_name FROM \"director\" ORDER BY id ASC";
     private static final String SQL_INSERT_DIRECTOR = "INSERT INTO \"director\" (name) VALUES (?)";
     private static final String SQL_UPDATE_DIRECTOR = "UPDATE \"director\" SET name = ? WHERE id = ?";
     private static final String SQL_DELETE_DIRECTOR = "DELETE FROM \"director\" WHERE id = ?";
@@ -63,6 +64,7 @@ public class DbDirectorRepository {
         return jdbcTemplate.query(SQL_SELECT_DIRECTOR_BY_FILM_ID, directorRowMapper, filmId);
     }
 
+    @Transactional
     public void saveFilmDirectors(Film film, boolean isUpdate) {
         if (isUpdate) {
             jdbcTemplate.update(SQL_DELETE_FILM_DIRECTORS, film.getId());
@@ -74,7 +76,6 @@ public class DbDirectorRepository {
 
             jdbcTemplate.batchUpdate(SQL_INSERT_FILM_DIRECTOR, batchArgs);
     }
-
 
     public List<Integer> findAllExistingIds(Set<Integer> ids) {
         if (ids.isEmpty()) {
@@ -112,6 +113,7 @@ public class DbDirectorRepository {
         return Optional.of(director);
     }
 
+    @Transactional
     public Optional<Director> update(Director director) {
         int updated = jdbcTemplate.update(SQL_UPDATE_DIRECTOR,
                 director.getName(),
@@ -119,9 +121,26 @@ public class DbDirectorRepository {
         return updated == 1 ? Optional.of(director) : Optional.empty();
     }
 
+    @Transactional
     public boolean deleteById(int id) {
         int rowsAffected = jdbcTemplate.update(SQL_DELETE_DIRECTOR, id);
         return rowsAffected > 0;
+    }
+
+    public void validateDirectors(Set<Director> directors) {
+        if (directors == null || directors.isEmpty()) {
+            return;
+        }
+
+        Set<Integer> directorIds = directors.stream()
+                .map(Director::getId)
+                .collect(Collectors.toSet());
+
+        List<Integer> existingIds = findAllExistingIds(directorIds);
+
+        if (existingIds.size() != directorIds.size()) {
+            throw new DirectorNotFoundException("One or more directors not found");
+        }
     }
 
 }

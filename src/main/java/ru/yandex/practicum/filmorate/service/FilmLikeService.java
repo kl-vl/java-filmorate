@@ -25,6 +25,8 @@ public class FilmLikeService {
     private final DbEventRepository eventRepository;
 
     public boolean addLike(Integer filmId, Integer userId) {
+        log.info("addLike for film {} by user {}", filmId, userId);
+
         if (!filmRepository.existsById(filmId)) {
             throw new FilmNotFoundException("The Film with %s not found to like".formatted(filmId));
         }
@@ -49,6 +51,8 @@ public class FilmLikeService {
     }
 
     public boolean removeLike(Integer filmId, Integer userId) {
+        log.info("removeLike for film {} by user {}", filmId, userId);
+
         if (!filmRepository.existsById(filmId)) {
             throw new FilmNotFoundException("Film with ID %s not found to remove like".formatted(filmId));
         }
@@ -71,10 +75,12 @@ public class FilmLikeService {
     }
 
     public List<Film> getPopularFilms(Integer count, Integer year, Integer genreId) {
-        return filmRepository.getPopularFilms(count, year, genreId);
+            log.info("getPopularFilms with limit: {} {} {}", count, year, genreId);
+            return filmRepository.getPopularFilms(count, year, genreId);
     }
 
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        log.info("getCommonFilms by users: {} {}", userId, friendId);
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("Пользователь с ID=" + userId + " не найден");
         }

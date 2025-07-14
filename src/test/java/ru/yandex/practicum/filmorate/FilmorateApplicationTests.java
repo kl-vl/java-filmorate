@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.enums.SearchBy;
 import ru.yandex.practicum.filmorate.enums.EventOperation;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
@@ -20,6 +22,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.SearchCriteria;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.DbDirectorRepository;
 import ru.yandex.practicum.filmorate.repository.DbEventRepository;
@@ -112,8 +115,9 @@ class FilmorateApplicationTests {
     private User testUser3;
     private Film testFilm1;
     private Film testFilm2;
-    private Director director1;
-    private Director director2;
+    private Film testFilm3;
+    private Director testDirector1;
+    private Director testDirector2;
     private Review testReview1;
     private Review testReview2;
     private Review testReview3;
@@ -171,10 +175,10 @@ class FilmorateApplicationTests {
         jdbcTemplate.execute("DELETE FROM \"director\"");
         jdbcTemplate.execute("DELETE FROM \"film_director\"");
 
-        director1 = directorRepository.create(
+        testDirector1 = directorRepository.create(
                 Director.builder().name("Christopher Nolan").build()
         ).orElseThrow();
-        director2 = directorRepository.create(
+        testDirector2 = directorRepository.create(
                 Director.builder().name("Quentin Tarantino").build()
         ).orElseThrow();
 
@@ -333,7 +337,7 @@ class FilmorateApplicationTests {
         assertFalse(filmRepository.removeLike(film.getId(), user1.getId())); // Уже удален
     }
 
-   @Test
+    @Test
     void validateMpa_ShouldThrowWhenInvalid() {
         testFilm1.setMpa(new Mpa(999, "Invalid"));
 
@@ -358,11 +362,11 @@ class FilmorateApplicationTests {
 
     @Test
     void findById_shouldReturnDirectorWhenExists() {
-        Optional<Director> result = directorRepository.findById(director1.getId());
+        Optional<Director> result = directorRepository.findById(testDirector1.getId());
 
         assertAll(
                 () -> assertTrue(result.isPresent(), "Director should be present"),
-                () -> assertEquals(director1, result.get(), "Returned director should match expected")
+                () -> assertEquals(testDirector1, result.get(), "Returned director should match expected")
         );
     }
 
@@ -400,25 +404,25 @@ class FilmorateApplicationTests {
     @Test
     void update_shouldModifyExistingDirector() {
         Director updated = Director.builder()
-                .id(director1.getId())
+                .id(testDirector1.getId())
                 .name("Chris Nolan")
                 .build();
 
         Director result = directorRepository.update(updated).orElseThrow();
-        Optional<Director> retrieved = directorRepository.findById(director1.getId());
+        Optional<Director> retrieved = directorRepository.findById(testDirector1.getId());
 
         assertAll(
                 () -> assertEquals(updated, result, "Returned director should match updated"),
                 () -> assertTrue(retrieved.isPresent(), "Director should exist"),
                 () -> assertEquals("Chris Nolan", retrieved.get().getName(), "Name should be updated"),
-                () -> assertEquals(director1.getId(), retrieved.get().getId(), "ID should remain the same")
+                () -> assertEquals(testDirector1.getId(), retrieved.get().getId(), "ID should remain the same")
         );
     }
 
     @Test
     void deleteById_shouldRemoveDirector() {
-        boolean deleted = directorRepository.deleteById(director1.getId());
-        Optional<Director> result = directorRepository.findById(director1.getId());
+        boolean deleted = directorRepository.deleteById(testDirector1.getId());
+        Optional<Director> result = directorRepository.findById(testDirector1.getId());
 
         assertAll(
                 () -> assertTrue(deleted, "Should return true when deleted"),
@@ -430,7 +434,7 @@ class FilmorateApplicationTests {
     @Test
     void existsById_shouldReturnCorrectStatus() {
         assertAll(
-                () -> assertTrue(directorRepository.existsById(director1.getId())),
+                () -> assertTrue(directorRepository.existsById(testDirector1.getId())),
                 () -> assertFalse(directorRepository.existsById(999))
         );
     }
@@ -761,6 +765,106 @@ class FilmorateApplicationTests {
         List<Film> recs = recommendationService.recommendFor(u1.getId());
         assertEquals(1, recs.size(), "Ожидаем ровно одну рекомендацию");
         assertEquals(f2.getId(), recs.get(0).getId(), "Должен порекомендовать только фильм f2");
+    }
+
+
+    @Nested
+    class FilmSearchTests {
+        @BeforeEach
+        void setupDirectorData() {
+            createTestDataForSearch();
+        }
+
+        private void createTestDataForSearch() {
+            Mpa mpa = mpaRepository.getMpaById(1).orElseThrow();
+
+            testDirector1 = directorRepository.create(
+                    Director.builder()
+                            .name("Энг Ли")
+                            .build()
+            ).orElseThrow();
+
+            testDirector2 = directorRepository.create(
+                    Director.builder()
+                            .name("Ночной режиссер")
+                            .build()
+            ).orElseThrow();
+
+            testFilm1 = filmRepository.create(Film.builder()
+                    .name("Крадущийся тигр, затаившийся дракон")
+                    .description("Фильм о боевых искусствах")
+                    .releaseDate(LocalDate.of(2000, 5, 18))
+                    .duration(Duration.ofMinutes(120))
+                    .mpa(mpa)
+                    .directors(Set.of(testDirector1))
+                    .build()).orElseThrow();
+
+            testFilm2 = filmRepository.create(Film.builder()
+                    .name("Крадущийся в ночи")
+                    .description("Триллер о ночных приключениях")
+                    .releaseDate(LocalDate.of(2021, 3, 15))
+                    .duration(Duration.ofMinutes(110))
+                    .mpa(mpa)
+                    .build()).orElseThrow();
+
+            testFilm3 = filmRepository.create(Film.builder()
+                    .name("Совсем другой фильм")
+                    .description("Не содержит искомых слов")
+                    .releaseDate(LocalDate.of(2022, 1, 10))
+                    .duration(Duration.ofMinutes(90))
+                    .mpa(mpa)
+                    .build()).orElseThrow();
+        }
+
+        @Test
+        void searchByTitle_shouldFindTwoFilmsWithWordKrad() {
+            SearchCriteria criteria = new SearchCriteria("крад", SearchBy.TITLE);
+            List<Film> result = filmRepository.searchFilms(criteria);
+
+            assertEquals(2, result.size(), "Должно найти 2 фильма с 'крад' в названии");
+            assertTrue(containsFilmWithName(result, "Крадущийся тигр, затаившийся дракон"));
+            assertTrue(containsFilmWithName(result, "Крадущийся в ночи"));
+        }
+
+        @Test
+        void searchByDirector_shouldFindFilmByDirectorEngLi() {
+            SearchCriteria criteria = new SearchCriteria("Энг", SearchBy.DIRECTOR);
+            List<Film> result = filmRepository.searchFilms(criteria);
+
+            assertEquals(1, result.size());
+            assertEquals(testFilm1.getName(), result.get(0).getName());
+        }
+
+        @Test
+        void searchByBoth_shouldFindAllFilmsWithWordKrad() {
+            SearchCriteria criteria = new SearchCriteria("крад", SearchBy.BOTH);
+            List<Film> result = filmRepository.searchFilms(criteria);
+
+            assertEquals(2, result.size());
+            assertTrue(containsFilmWithName(result, "Крадущийся тигр, затаившийся дракон"));
+            assertTrue(containsFilmWithName(result, "Крадущийся в ночи"));
+        }
+
+        @Test
+        void searchByTitle_shouldBeCaseInsensitive() {
+            SearchCriteria criteria = new SearchCriteria("КРАД", SearchBy.TITLE);
+            List<Film> result = filmRepository.searchFilms(criteria);
+
+            System.out.println(result);
+            assertEquals(2, result.size());
+        }
+
+        @Test
+        void search_shouldReturnEmptyListWhenNoMatches() {
+            SearchCriteria criteria = new SearchCriteria("несуществующий", SearchBy.BOTH);
+            List<Film> result = filmRepository.searchFilms(criteria);
+
+            assertTrue(result.isEmpty());
+        }
+
+        private boolean containsFilmWithName(List<Film> films, String name) {
+            return films.stream().anyMatch(f -> f.getName().equals(name));
+        }
     }
 
 }
