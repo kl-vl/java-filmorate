@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.repository;
 
+import java.util.Collection;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
@@ -27,6 +28,12 @@ public interface FilmRepository {
     List<Film> getCommonFilms(Integer userId, Integer friendId);
 
     boolean removeFilmById(Integer id);
+
+    Collection<Film> bestFilmsFromGenreAndYear(Integer releaseDate, Integer genreId);
+
+    Collection<Film> bestFilmsOfYear(Integer year);
+
+    Collection<Film> bestFilmsOfGenre(Integer genreId);
 
 
 }

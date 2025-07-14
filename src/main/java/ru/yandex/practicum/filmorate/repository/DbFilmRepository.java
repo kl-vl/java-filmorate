@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import jakarta.validation.ValidationException;
+import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -150,6 +151,78 @@ public class DbFilmRepository implements FilmRepository {
     GROUP BY f.id, f.name, f.description, f.release_date, f.duration, m.id, m.name, g.id, g.name
     ORDER BY popularity DESC
     """;
+
+    private static final String SQL_BEST_FILMS_FROM_GENRE_AND_YEAR = """
+            SELECT g.name AS genre_name,
+                   f.id,
+                   f.mpa_id,
+                   f.name,
+                   f.description,
+                   f.release_date,
+                   EXTRACT(YEAR FROM f.release_date) AS release_year,
+                   f.duration,
+                   COUNT(DISTINCT(fl.user_id)) AS film_like
+            FROM "film" AS f
+            JOIN "film_genre" AS fg ON f.id = fg.film_id
+            JOIN "genre" AS g ON fg.genre_id = g.id
+            LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
+            WHERE EXTRACT(YEAR FROM f.release_date) = ? AND g.id = ?
+            GROUP BY g.name,
+                     f.id,
+                     f.mpa_id,
+                     f.name,
+                     f.description,
+                     f.release_date,
+                     f.duration
+            ORDER BY film_like DESC;
+            """;
+
+    private static final String SQL_FILMS_OF_YEAR = """
+            SELECT
+                f.id,
+                f.mpa_id,
+                f.name,
+                f.description,
+                f.release_date,
+                EXTRACT(YEAR FROM f.release_date) AS release_year,
+                f.duration,
+                COUNT(fl.user_id) AS film_like
+            FROM "film" AS f
+            LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
+            WHERE EXTRACT(YEAR FROM f.release_date) = ?
+            GROUP BY
+                f.id,
+                f.mpa_id,
+                f.name,
+                f.description,
+                f.release_date,
+                f.duration
+            ORDER BY film_like DESC;
+            """;
+
+    private static final String SQL_FILMS_OF_GENRE = """
+            SELECT
+                f.id,
+                f.mpa_id,
+                f.name,
+                f.description,
+                f.release_date,
+                f.duration,
+                COUNT(DISTINCT fl.user_id) AS film_like
+            FROM "film" AS f
+            LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
+            JOIN "film_genre" AS fg ON f.id = fg.film_id
+            JOIN "genre" AS g ON fg.genre_id = g.id
+            WHERE g.id = ?
+            GROUP BY
+                f.id,
+                f.mpa_id,
+                f.name,
+                f.description,
+                f.release_date,
+                f.duration
+            ORDER BY film_like DESC;
+            """;
 
     private final JdbcTemplate jdbcTemplate;
     private final DbMpaRepository mpaRepository;
@@ -516,4 +589,26 @@ public class DbFilmRepository implements FilmRepository {
         return delete > 0;
     }
 
+    @Override
+    public Collection<Film> bestFilmsFromGenreAndYear(Integer year, Integer genreID) {
+        String getGenreById = "SELECT id, name FROM \"genre\" WHERE id = ?";
+
+        Genre genre = jdbcTemplate.queryForObject(getGenreById, genreMapper, genreID);
+
+        if (genre == null) {
+            throw new GenreNotFoundException("Жанр с ID " + genreID + " - не существует");
+        }
+
+        return jdbcTemplate.query(SQL_BEST_FILMS_FROM_GENRE_AND_YEAR, filmRowMapper, year, genreID);
+    }
+
+    @Override
+    public Collection<Film> bestFilmsOfYear(Integer year) {
+        return jdbcTemplate.query(SQL_FILMS_OF_YEAR, filmRowMapper, year);
+    }
+
+    @Override
+    public Collection<Film> bestFilmsOfGenre(Integer genreId) {
+        return jdbcTemplate.query(SQL_FILMS_OF_GENRE, filmRowMapper, genreId);
+    }
 }
