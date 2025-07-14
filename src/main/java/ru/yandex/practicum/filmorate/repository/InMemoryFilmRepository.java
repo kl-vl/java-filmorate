@@ -113,4 +113,17 @@ public class InMemoryFilmRepository implements FilmRepository {
     public boolean removeFilmById(Integer filmId) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public List<Integer> findLikedFilmIdsByUser(Integer userId) {
+        return likes.entrySet().stream()
+                .filter(entry -> entry.getValue().contains(userId))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public int countLikesByFilmId(Integer filmId) {
+        return likes.getOrDefault(filmId, Collections.emptySet()).size();
+    }
 }

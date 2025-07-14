@@ -30,6 +30,9 @@ import ru.yandex.practicum.filmorate.repository.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.MpaRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.ReviewRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.UserRowMapper;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.RecommendationService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -49,8 +52,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JdbcTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({DbUserRepository.class, DbFilmRepository.class, DbGenreRepository.class, DbMpaRepository.class, DbDirectorRepository.class, DbReviewRepository.class,
-        FilmRowMapper.class, UserRowMapper.class, GenreRowMapper.class, MpaRowMapper.class, DirectorRowMapper.class, ReviewRowMapper.class})
+@Import({
+        DbUserRepository.class,
+        DbFilmRepository.class,
+        DbGenreRepository.class,
+        DbMpaRepository.class,
+        DbDirectorRepository.class,
+        DbReviewRepository.class,
+        FilmRowMapper.class,
+        UserRowMapper.class,
+        GenreRowMapper.class,
+        MpaRowMapper.class,
+        DirectorRowMapper.class,
+        ReviewRowMapper.class,
+        UserService.class,
+        FilmService.class,
+        RecommendationService.class
+})
+
 @Transactional
 class FilmorateApplicationTests {
 
@@ -74,6 +93,9 @@ class FilmorateApplicationTests {
 
     @Autowired
     private DbDirectorRepository directorRepository;
+
+    @Autowired
+    private RecommendationService recommendationService;
 
     private User testUser1;
     private User testUser2;
@@ -614,6 +636,44 @@ class FilmorateApplicationTests {
                 .isPositive(true)
                 .build();
         testReview3 = reviewRepository.create(review3).orElseThrow();
+    }
+
+    @Test
+    void recommendFor_NoRecommendationsWhenNoLikes() {
+        // создаём двух пользователей, один фильм, но не ставим лайков
+        User u1 = userRepository.create(testUser1).orElseThrow();
+        User u2 = userRepository.create(testUser2).orElseThrow();
+        filmRepository.create(testFilm1).orElseThrow();
+
+        // ни у кого нет лайков → пусто
+        List<Film> recs1 = recommendationService.recommendFor(u1.getId());
+        assertTrue(recs1.isEmpty(), "Ожидаем пустой список, если у пользователя нет лайков");
+
+        List<Film> recs2 = recommendationService.recommendFor(u2.getId());
+        assertTrue(recs2.isEmpty(), "Ожидаем пустой список, если у всех нет лайков");
+    }
+
+    @Test
+    void recommendFor_ShouldRecommendBasedOnMostCommonNeighbor() {
+        // три пользователя и два фильма
+        User u1 = userRepository.create(testUser1).orElseThrow(); // целевой
+        User u2 = userRepository.create(testUser2).orElseThrow(); // сосед 1
+        User u3 = userRepository.create(testUser3).orElseThrow(); // сосед 2
+        Film f1 = filmRepository.create(testFilm1).orElseThrow();
+        Film f2 = filmRepository.create(testFilm2).orElseThrow();
+
+        // u1 лайкнул только f1
+        filmRepository.addLike(f1.getId(), u1.getId());
+        // u2 (первый сосед) лайкнул f1 и f2 → 1 общее с u1
+        filmRepository.addLike(f1.getId(), u2.getId());
+        filmRepository.addLike(f2.getId(), u2.getId());
+        // u3 лайкнул только f1 → 1 общее, но у него нет кандидатов для рекомендации
+        filmRepository.addLike(f1.getId(), u3.getId());
+
+        // проверяем рекомендации для u1
+        List<Film> recs = recommendationService.recommendFor(u1.getId());
+        assertEquals(1, recs.size(), "Ожидаем ровно одну рекомендацию");
+        assertEquals(f2.getId(), recs.get(0).getId(), "Должен порекомендовать только фильм f2");
     }
 
 }
