@@ -53,7 +53,7 @@ public class FilmService {
             throw new FilmNotFoundException("The Film with %s not found".formatted(film.getId()));
         }
 
-        Film updatedFilm = filmRepository.update(film).orElseThrow(() -> new FilmCreateFailed("Film update failed"));;
+        Film updatedFilm = filmRepository.update(film).orElseThrow(() -> new FilmCreateFailed("Film update failed"));
 
         log.info("Film updated successfully. ID : {}", updatedFilm.getId());
         log.debug("Film updated data: {}", updatedFilm);
@@ -100,6 +100,8 @@ public class FilmService {
         if (targetFilms.isEmpty()) {
             throw new FilmNotFoundException("Фильмы с указанными параметрами не найдены");
         }
+        log.debug("Вернули {} фильмов", targetFilms.size());
+
         return targetFilms;
     }
 
@@ -115,6 +117,7 @@ public class FilmService {
         if (films.isEmpty()) {
             throw new FilmNotFoundException("За " + year + " год, фильмов нет");
         }
+        log.debug("Вернули {} фильмов", films.size());
 
         return films;
     }
@@ -124,11 +127,13 @@ public class FilmService {
             throw new GenreValidationException("Жанр не может быть " + genreId);
         }
 
-        Collection<Film> films =  filmRepository.bestFilmsOfGenre(genreId);
+        Collection<Film> films = filmRepository.bestFilmsOfGenre(genreId);
 
         if (films.isEmpty()) {
             throw new FilmNotFoundException("Фильмы с id жанра " + genreId + " - не найдены");
         }
+        log.debug("Вернули {} фильмов", films.size());
+
         return films;
     }
 
