@@ -93,7 +93,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular?year={year}&genreId={genreId}")
-    public Collection<Film> bestFilmsFromGenre(@PathVariable Integer year, @PathVariable Integer genreID) {
+    public Collection<Film> bestFilmsFromGenreAndYear(@PathVariable Integer year, @PathVariable Integer genreID) {
         return filmService.bestFilmsFromGenreAndYear(year, genreID);
     }
 
