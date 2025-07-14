@@ -106,4 +106,19 @@ public class FilmController {
         return filmService.searchFilms(SearchCriteria.from(query, by));
     }
 
+    @GetMapping("/popular?year={year}&genreId={genreId}")
+    public Collection<Film> bestFilmsFromGenre(@PathVariable Integer year, @PathVariable Integer genreID) {
+        return filmService.bestFilmsFromGenreAndYear(year, genreID);
+    }
+
+    @GetMapping("/popular?year={year}")
+    public Collection<Film> bestFilmsOfYear(@PathVariable Integer year) {
+        return filmService.bestFilmsOfYear(year);
+    }
+
+    @GetMapping("popular?genreId={genreId}")
+    public Collection<Film> bestFilmsOfGenre(@PathVariable Integer genreId) {
+        return filmService.bestFilmsOfGenre(genreId);
+    }
+
 }
