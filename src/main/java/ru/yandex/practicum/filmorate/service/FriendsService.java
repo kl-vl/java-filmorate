@@ -3,8 +3,12 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.enums.EventOperation;
+import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.repository.DbEventRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.Collections;
@@ -17,6 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FriendsService {
     private final UserRepository userRepository;
+    private final DbEventRepository eventRepository;
 
 
     public boolean addFriend(Integer userId, Integer friendId) {
@@ -35,6 +40,14 @@ public class FriendsService {
         }
 
         userRepository.addFriend(userId, friendId);
+
+        Event newEvent = Event.builder()
+                .eventType(EventType.FRIEND)
+                .operation(EventOperation.ADD)
+                .userId(userId)
+                .entityId(friendId)
+                .build();
+        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
 
         return true;
     }
@@ -56,6 +69,15 @@ public class FriendsService {
 
         userRepository.removeFriend(userId, friendId);
         userRepository.removeFriend(friendId, userId);
+
+        Event newEvent = Event.builder()
+                .eventType(EventType.FRIEND)
+                .operation(EventOperation.REMOVE)
+                .userId(userId)
+                .entityId(friendId)
+                .build();
+        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+
         return true;
     }
 
