@@ -78,8 +78,7 @@ public class DbFilmRepository implements FilmRepository {
                 m.id AS mpa_id, m.name AS mpa_name,
                 g.id AS genre_id, g.name AS genre_name,
                 d.id AS director_id, d.name AS director_name,
-                (SELECT COUNT(*) FROM "film_like" WHERE fl.film_id = f.id) AS popularity
-                --COUNT(DISTINCT fl.user_id) AS popularity
+                COUNT(DISTINCT fl.user_id) AS popularity
             FROM "film" f
             LEFT JOIN "mpa" m ON f.mpa_id = m.id
             LEFT JOIN "film_genre" fg ON f.id = fg.film_id
