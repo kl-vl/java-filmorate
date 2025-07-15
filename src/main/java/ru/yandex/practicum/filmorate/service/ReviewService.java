@@ -3,17 +3,22 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.enums.EventOperation;
+import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ReviewCreateFailed;
 import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ReviewValidationException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.repository.DbEventRepository;
 import ru.yandex.practicum.filmorate.repository.DbReviewRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +28,7 @@ public class ReviewService {
     private final DbReviewRepository reviewRepository;
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
+    private final DbEventRepository eventRepository;
 
     public Review addReview(Review review) {
         log.debug("Создание нового отзыва: filmId = {}, userId = {}, content = {}",
@@ -30,6 +36,14 @@ public class ReviewService {
         checkReviewWithoutIdOrThrow(review);
         Review newReview = reviewRepository.create(review)
                 .orElseThrow(() -> new ReviewCreateFailed("Не удалось сохранить отзыв"));
+
+        Event newEvent = Event.builder()
+                .eventType(EventType.REVIEW)
+                .operation(EventOperation.ADD)
+                .userId(newReview.getUserId())
+                .entityId(newReview.getReviewId())
+                .build();
+        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
 
         log.info("Отзыв создан, reviewId = {}", newReview.getReviewId());
         log.debug("Создан отзыв {}", newReview);
@@ -44,6 +58,14 @@ public class ReviewService {
         Review newReview = reviewRepository.update(review)
                 .orElseThrow(() -> new ReviewCreateFailed("Не удалось изменить отзыв"));
 
+        Event newEvent = Event.builder()
+                .eventType(EventType.REVIEW)
+                .operation(EventOperation.UPDATE)
+                .userId(newReview.getUserId())
+                .entityId(newReview.getReviewId())
+                .build();
+        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+
         log.info("Отзыв изменен, reviewId = {}", newReview.getReviewId());
         log.debug("Изменен отзыв {}", newReview);
         return newReview;
@@ -57,8 +79,18 @@ public class ReviewService {
 
     public boolean deleteReview(Integer id) {
         log.debug("deleteReview {}", id);
-        getReviewById(id);
-        return reviewRepository.deleteReview(id);
+        Review review = getReviewById(id);
+        boolean res = reviewRepository.deleteReview(id);
+
+        Event newEvent = Event.builder()
+                .eventType(EventType.REVIEW)
+                .operation(EventOperation.REMOVE)
+                .userId(review.getUserId())
+                .entityId(review.getReviewId())
+                .build();
+        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+
+        return res;
     }
 
     public List<Review> getAll(Integer filmId, Integer limit) {
