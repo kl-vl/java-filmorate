@@ -78,7 +78,8 @@ public class DbFilmRepository implements FilmRepository {
                 m.id AS mpa_id, m.name AS mpa_name,
                 g.id AS genre_id, g.name AS genre_name,
                 d.id AS director_id, d.name AS director_name,
-                (SELECT COUNT(*) FROM "film_like" WHERE film_id = f.id) AS popularity
+                (SELECT COUNT(*) FROM "film_like" WHERE fl.film_id = f.id) AS popularity
+                --COUNT(DISTINCT fl.user_id) AS popularity
             FROM "film" f
             LEFT JOIN "mpa" m ON f.mpa_id = m.id
             LEFT JOIN "film_genre" fg ON f.id = fg.film_id
@@ -88,7 +89,6 @@ public class DbFilmRepository implements FilmRepository {
             LEFT JOIN "director" d ON fd.director_id = d.id
             GROUP BY f.id, m.id, g.id
             ORDER BY popularity DESC
-            LIMIT ?
             """;
     private static final String SQL_SELECT_FILMS_BY_DIRECTOR_LIKES = """
             SELECT
@@ -409,12 +409,8 @@ public class DbFilmRepository implements FilmRepository {
         return processFilmsQuery(SQL_SELECT_FILMS_WITH_DETAILS, limit);
     }
 
-    public List<Film> getPopularFilms(int limit) {
-        return processFilmsQuery(SQL_SELECT_FILM_POPULAR, limit);
-    }
-
     public List<Film> getPopularFilms(Integer limit, Integer year, Integer genreId) {
-        String sql = "";
+        String sql = SQL_SELECT_FILM_POPULAR;
         Object[] params = {};
 
         if (year != null && genreId != null) {
@@ -433,6 +429,8 @@ public class DbFilmRepository implements FilmRepository {
         if (!sql.isEmpty() && (limit != null && limit > 0)) {
             sql += "\nLIMIT " + limit;
         }
+
+        System.out.println("sql" + sql + "params" + params);
 
         return processFilmsQuery(sql, params);
     }
