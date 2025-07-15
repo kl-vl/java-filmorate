@@ -89,8 +89,9 @@ public class InMemoryFilmRepository implements FilmRepository {
         return likes.getOrDefault(filmId, Collections.emptySet()).contains(userId);
     }
 
+    @Deprecated
     @Override
-    public List<Film> getPopularFilms(int count) {
+    public List<Film> getPopularFilms(Integer count, Integer year, Integer genreId) {
         return likes.entrySet().stream()
                 .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
                 .limit(count)

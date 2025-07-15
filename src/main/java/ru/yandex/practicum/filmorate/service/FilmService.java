@@ -51,7 +51,7 @@ public class FilmService {
             throw new FilmNotFoundException("The Film with %s not found".formatted(film.getId()));
         }
 
-        Film updatedFilm = filmRepository.update(film).orElseThrow(() -> new FilmCreateFailed("Film update failed"));;
+        Film updatedFilm = filmRepository.update(film).orElseThrow(() -> new FilmCreateFailed("Film update failed"));
 
         log.info("Film updated successfully. ID : {}", updatedFilm.getId());
         log.debug("Film updated data: {}", updatedFilm);
