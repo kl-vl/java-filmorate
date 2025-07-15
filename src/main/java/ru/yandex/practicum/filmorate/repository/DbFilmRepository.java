@@ -317,8 +317,6 @@ public class DbFilmRepository implements FilmRepository {
         return new ArrayList<>(filmsMap.values());
     }
 
-
-
     @Override
     @Transactional
     public Optional<Film> create(Film film) {
