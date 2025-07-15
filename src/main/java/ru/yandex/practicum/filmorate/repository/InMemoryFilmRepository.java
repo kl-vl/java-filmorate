@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.repository;
 
-import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
@@ -90,8 +89,9 @@ public class InMemoryFilmRepository implements FilmRepository {
         return likes.getOrDefault(filmId, Collections.emptySet()).contains(userId);
     }
 
+    @Deprecated
     @Override
-    public List<Film> getPopularFilms(int count) {
+    public List<Film> getPopularFilms(Integer count, Integer year, Integer genreId) {
         return likes.entrySet().stream()
                 .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
                 .limit(count)
@@ -112,21 +112,6 @@ public class InMemoryFilmRepository implements FilmRepository {
 
     @Override
     public boolean removeFilmById(Integer filmId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Collection<Film> bestFilmsFromGenreAndYear(Integer releaseDate, Integer genreId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Collection<Film> bestFilmsOfYear(Integer year) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Collection<Film> bestFilmsOfGenre(Integer genreId) {
         throw new UnsupportedOperationException();
     }
 }

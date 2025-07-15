@@ -282,7 +282,7 @@ class FilmorateApplicationTests {
         filmRepository.addLike(film1.getId(), user2.getId());
         filmRepository.addLike(film2.getId(), user1.getId());
 
-        List<Film> popularFilms = filmRepository.getPopularFilms(1);
+        List<Film> popularFilms = filmRepository.getPopularFilms(1, 2001, 1);
 
         assertEquals(1, popularFilms.size());
         assertEquals(film1.getId(), popularFilms.getFirst().getId());

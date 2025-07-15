@@ -45,8 +45,8 @@ public class FilmLikeService {
         return filmRepository.removeLike(filmId, userId);
     }
 
-    public List<Film> getPopularFilms(int count) {
-        return filmRepository.getPopularFilms(count);
+    public List<Film> getPopularFilms(Integer count, Integer year, Integer genreId) {
+        return filmRepository.getPopularFilms(count, year, genreId);
     }
 
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {

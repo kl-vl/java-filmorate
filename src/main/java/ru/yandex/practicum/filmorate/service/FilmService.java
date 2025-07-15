@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmCreateFailed;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmValidationException;
-import ru.yandex.practicum.filmorate.exception.GenreValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.DbDirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
@@ -81,60 +79,6 @@ public class FilmService {
         filmRepository.removeFilmById(filmId);
 
         log.info("Удаление фильма с ID: {} прошло успешно", filmId);
-    }
-
-    public Collection<Film> bestFilmsFromGenreAndYear(Integer year, Integer genreID) {
-        log.info("Получены параметры запроса. Год релиза {}, ID жанра {}", year, genreID);
-
-        if (year == null || year < 0) {
-            throw new FilmValidationException("Год не может быть " + year);
-        }
-
-        if (genreID == null || genreID < 0) {
-            throw new FilmValidationException("Жанр не может быть " + genreID);
-        }
-
-
-        Collection<Film> targetFilms = filmRepository.bestFilmsFromGenreAndYear(year, genreID);
-
-        if (targetFilms.isEmpty()) {
-            throw new FilmNotFoundException("Фильмы с указанными параметрами не найдены");
-        }
-        log.debug("Вернули {} фильмов", targetFilms.size());
-
-        return targetFilms;
-    }
-
-    public Collection<Film> bestFilmsOfYear(Integer year) {
-        log.info("Получили год {}", year);
-
-        if (year == null || year < 0) {
-            throw new FilmValidationException("Год не может быть " + year);
-        }
-
-        Collection<Film> films = filmRepository.bestFilmsOfYear(year);
-
-        if (films.isEmpty()) {
-            throw new FilmNotFoundException("За " + year + " год, фильмов нет");
-        }
-        log.debug("Вернули {} фильмов", films.size());
-
-        return films;
-    }
-
-    public Collection<Film> bestFilmsOfGenre(Integer genreId) {
-        if (genreId == null || genreId < 0) {
-            throw new GenreValidationException("Жанр не может быть " + genreId);
-        }
-
-        Collection<Film> films = filmRepository.bestFilmsOfGenre(genreId);
-
-        if (films.isEmpty()) {
-            throw new FilmNotFoundException("Фильмы с id жанра " + genreId + " - не найдены");
-        }
-        log.debug("Вернули {} фильмов", films.size());
-
-        return films;
     }
 
 }

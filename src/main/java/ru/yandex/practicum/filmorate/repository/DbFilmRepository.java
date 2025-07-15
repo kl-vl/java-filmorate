@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import jakarta.validation.ValidationException;
-import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -153,75 +152,91 @@ public class DbFilmRepository implements FilmRepository {
     """;
 
     private static final String SQL_BEST_FILMS_FROM_GENRE_AND_YEAR = """
-            SELECT g.name AS genre_name,
-                   f.id,
-                   f.mpa_id,
-                   f.name,
+            SELECT g.id AS genre_id,
+                   g.name AS genre_name,
+                   f.id AS film_id,
+                   m.id AS mpa_id,
+                   m.name AS mpa_name,
+                   f.name AS film_name,
                    f.description,
                    f.release_date,
                    EXTRACT(YEAR FROM f.release_date) AS release_year,
                    f.duration,
-                   COUNT(DISTINCT(fl.user_id)) AS film_like
+                   COUNT(DISTINCT fl.user_id) AS film_like
             FROM "film" AS f
             JOIN "film_genre" AS fg ON f.id = fg.film_id
             JOIN "genre" AS g ON fg.genre_id = g.id
+            JOIN "mpa" AS m ON f.mpa_id = m.id
             LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
             WHERE EXTRACT(YEAR FROM f.release_date) = ? AND g.id = ?
-            GROUP BY g.name,
-                     f.id,
-                     f.mpa_id,
+            GROUP BY g.id,
+                     g.name,
+                     m.id,
+                     m.name,
                      f.name,
                      f.description,
                      f.release_date,
                      f.duration
-            ORDER BY film_like DESC;
+            ORDER BY film_like DESC
             """;
 
     private static final String SQL_FILMS_OF_YEAR = """
-            SELECT
-                f.id,
-                f.mpa_id,
-                f.name,
-                f.description,
-                f.release_date,
-                EXTRACT(YEAR FROM f.release_date) AS release_year,
-                f.duration,
-                COUNT(fl.user_id) AS film_like
+            SELECT g.id AS genre_id,
+                   g.name AS genre_name,
+                   m.id AS mpa_id,
+                   m.name AS mpa_name,
+                   f.id AS film_id,
+                   f.name AS film_name,
+                   f.description,
+                   f.release_date,
+                   EXTRACT(YEAR FROM f.release_date) AS release_year,
+                   f.duration,
+                   COUNT(DISTINCT fl.user_id) AS film_like
             FROM "film" AS f
+            JOIN "film_genre" AS fg ON f.id = fg.film_id
+            JOIN "genre" AS g ON fg.genre_id = g.id
+            JOIN "mpa" AS m ON f.mpa_id = m.id
             LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
             WHERE EXTRACT(YEAR FROM f.release_date) = ?
-            GROUP BY
-                f.id,
-                f.mpa_id,
-                f.name,
-                f.description,
-                f.release_date,
-                f.duration
-            ORDER BY film_like DESC;
+            GROUP BY g.id,
+                     g.name,
+                     m.id,
+                     m.name,
+                     f.id,
+                     f.name,
+                     f.description,
+                     f.release_date,
+                     f.duration
+            ORDER BY film_like DESC
             """;
 
     private static final String SQL_FILMS_OF_GENRE = """
-            SELECT
-                f.id,
-                f.mpa_id,
-                f.name,
-                f.description,
-                f.release_date,
-                f.duration,
-                COUNT(DISTINCT fl.user_id) AS film_like
+            SELECT g.id AS genre_id,
+                   g.name AS genre_name,
+                   f.id AS film_id,
+                   m.id AS mpa_id,
+                   m.name AS mpa_name,
+                   f.name AS film_name,
+                   f.description,
+                   f.release_date,
+                   f.duration,
+                   COUNT(DISTINCT fl.user_id) AS film_like
             FROM "film" AS f
             LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
             JOIN "film_genre" AS fg ON f.id = fg.film_id
             JOIN "genre" AS g ON fg.genre_id = g.id
+            JOIN "mpa" AS m ON f.mpa_id = m.id
             WHERE g.id = ?
-            GROUP BY
-                f.id,
-                f.mpa_id,
-                f.name,
-                f.description,
-                f.release_date,
-                f.duration
-            ORDER BY film_like DESC;
+            GROUP BY g.id,
+                     g.name,
+                     f.id,
+                     m.id,
+                     m.name,
+                     f.name,
+                     f.description,
+                     f.release_date,
+                     f.duration
+            ORDER BY film_like DESC
             """;
 
     private final JdbcTemplate jdbcTemplate;
@@ -442,7 +457,41 @@ public class DbFilmRepository implements FilmRepository {
         return new ArrayList<>(filmsMap.values());
     }
 
-    public List<Film> getPopularFilms(int limit) {
+    public List<Film> getPopularFilms(Integer limit, Integer year, Integer genreId) {
+        if (year != null && genreId != null) {
+
+            if (limit != null) {
+                String sql = SQL_BEST_FILMS_FROM_GENRE_AND_YEAR + "\nLIMIT " + limit;
+
+                return jdbcTemplate.query(sql, filmRowMapper, year, genreId);
+
+            }
+
+            return jdbcTemplate.query(SQL_BEST_FILMS_FROM_GENRE_AND_YEAR, filmRowMapper, year, genreId);
+        }
+
+        if (year != null) {
+
+            if (limit != null) {
+                String sql = SQL_FILMS_OF_YEAR + "\nLIMIT " + limit;
+
+                return jdbcTemplate.query(sql, filmRowMapper, year);
+            }
+
+            return jdbcTemplate.query(SQL_FILMS_OF_YEAR, filmRowMapper, year);
+        }
+
+        if (genreId != null) {
+
+            if (limit != null) {
+                String sql = SQL_FILMS_OF_GENRE + "\nLIMIT " + limit;
+
+                return jdbcTemplate.query(sql, filmRowMapper, genreId);
+            }
+
+            return jdbcTemplate.query(SQL_FILMS_OF_GENRE, filmRowMapper, genreId);
+        }
+
         Map<Integer, Film> filmMap = new LinkedHashMap<>();
 
         jdbcTemplate.query(SQL_SELECT_FILM_POPULAR, rs -> {
@@ -587,28 +636,5 @@ public class DbFilmRepository implements FilmRepository {
         int delete = jdbcTemplate.update(SQL_REMOVE_FILM_BY_ID, filmId);
 
         return delete > 0;
-    }
-
-    @Override
-    public Collection<Film> bestFilmsFromGenreAndYear(Integer year, Integer genreID) {
-        String getGenreById = "SELECT id, name FROM \"genre\" WHERE id = ?";
-
-        Genre genre = jdbcTemplate.queryForObject(getGenreById, genreMapper, genreID);
-
-        if (genre == null) {
-            throw new GenreNotFoundException("Жанр с ID " + genreID + " - не существует");
-        }
-
-        return jdbcTemplate.query(SQL_BEST_FILMS_FROM_GENRE_AND_YEAR, filmRowMapper, year, genreID);
-    }
-
-    @Override
-    public Collection<Film> bestFilmsOfYear(Integer year) {
-        return jdbcTemplate.query(SQL_FILMS_OF_YEAR, filmRowMapper, year);
-    }
-
-    @Override
-    public Collection<Film> bestFilmsOfGenre(Integer genreId) {
-        return jdbcTemplate.query(SQL_FILMS_OF_GENRE, filmRowMapper, genreId);
     }
 }

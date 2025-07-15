@@ -70,8 +70,10 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
-        return likeService.getPopularFilms(count);
+    public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count,
+                                            @RequestParam(required = false) Integer year,
+                                            @RequestParam(required = false) Integer genreId) {
+        return likeService.getPopularFilms(count, year, genreId);
     }
 
     @DeleteMapping("/{filmId}")
@@ -90,21 +92,6 @@ public class FilmController {
         }
 
         return filmService.getFilmsByDirector(directorId, sortBy);
-    }
-
-    @GetMapping("/popular?year={year}&genreId={genreId}")
-    public Collection<Film> bestFilmsFromGenreAndYear(@RequestParam Integer year, @RequestParam Integer genreID) {
-        return filmService.bestFilmsFromGenreAndYear(year, genreID);
-    }
-
-    @GetMapping("/popular?year={year}")
-    public Collection<Film> bestFilmsOfYear(@RequestParam Integer year) {
-        return filmService.bestFilmsOfYear(year);
-    }
-
-    @GetMapping("popular?genreId={genreId}")
-    public Collection<Film> bestFilmsOfGenre(@RequestParam Integer genreId) {
-        return filmService.bestFilmsOfGenre(genreId);
     }
 
 }
