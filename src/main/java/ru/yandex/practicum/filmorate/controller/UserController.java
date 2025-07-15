@@ -94,6 +94,7 @@ public class UserController {
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable Integer id) {
         return recommendationService.recommendFor(id);
+    }
       
     @GetMapping("/{userId}/feed")
     public Collection<Event> getEvents(@PathVariable Integer userId) {
