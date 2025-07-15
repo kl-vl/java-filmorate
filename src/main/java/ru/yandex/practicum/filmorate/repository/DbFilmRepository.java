@@ -70,7 +70,6 @@ public class DbFilmRepository implements FilmRepository {
             ORDER BY f.id, g.id
             LIMIT ?
             """;
-    private static final String SQL_SELECT_FILM_LIMIT = "SELECT * FROM \"film\" ORDER BY id LIMIT ?";
     private static final String SQL_SELECT_FILM_POPULAR = """
             SELECT
                 f.id AS film_id, f.name AS film_name, f.description,
@@ -120,7 +119,7 @@ public class DbFilmRepository implements FilmRepository {
             WHERE fd.director_id = ?
             ORDER BY f.release_date
             """;
-    private static String SQL_INSERT_FILM_LIKE = "INSERT INTO \"film_like\" (film_id, user_id) VALUES (?, ?)";
+    private static final String SQL_INSERT_FILM_LIKE = "INSERT INTO \"film_like\" (film_id, user_id) VALUES (?, ?)";
     private static final String SQL_REMOVE_FILM_BY_ID = "DELETE FROM \"film\" WHERE id = ?";
     private static final String SQL_SELECT_COMMON_FILMS = """
             SELECT
@@ -208,8 +207,8 @@ public class DbFilmRepository implements FilmRepository {
                    d.id AS director_id, d.name AS director_name,
                    COUNT(DISTINCT fl.user_id) AS film_like
             FROM "film" AS f
-            JOIN "film_genre" AS fg ON f.id = fg.film_id
-            JOIN "genre" AS g ON fg.genre_id = g.id
+            LEFT JOIN "film_genre" AS fg ON f.id = fg.film_id
+            LEFT JOIN "genre" AS g ON fg.genre_id = g.id
             JOIN "mpa" AS m ON f.mpa_id = m.id
             LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
             LEFT JOIN "film_director" fd ON f.id = fd.film_id
@@ -240,12 +239,12 @@ public class DbFilmRepository implements FilmRepository {
                    d.id AS director_id, d.name AS director_name,
                    COUNT(DISTINCT fl.user_id) AS film_like
             FROM "film" AS f
-            JOIN "film_genre" AS fg ON f.id = fg.film_id
-            JOIN "genre" AS g ON fg.genre_id = g.id
+            LEFT JOIN "film_genre" AS fg ON f.id = fg.film_id
+            LEFT JOIN "genre" AS g ON fg.genre_id = g.id
             JOIN "mpa" AS m ON f.mpa_id = m.id
             LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
             LEFT JOIN "film_director" fd ON f.id = fd.film_id
-            LEFT JOIN "director" d ON fd.director_id = d.i
+            LEFT JOIN "director" d ON fd.director_id = d.id
             WHERE EXTRACT(YEAR FROM f.release_date) = ?
             GROUP BY g.id,
                      g.name,
@@ -273,8 +272,8 @@ public class DbFilmRepository implements FilmRepository {
                    COUNT(DISTINCT fl.user_id) AS film_like
             FROM "film" AS f
             LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
-            JOIN "film_genre" AS fg ON f.id = fg.film_id
-            JOIN "genre" AS g ON fg.genre_id = g.id
+            LEFT JOIN "film_genre" AS fg ON f.id = fg.film_id
+            LEFT JOIN "genre" AS g ON fg.genre_id = g.id
             JOIN "mpa" AS m ON f.mpa_id = m.id
             LEFT JOIN "film_director" fd ON f.id = fd.film_id
             LEFT JOIN "director" d ON fd.director_id = d.id
@@ -425,11 +424,9 @@ public class DbFilmRepository implements FilmRepository {
             params = new Object[]{genreId};
         }
 
-        if (!sql.isEmpty() && (limit != null && limit > 0)) {
+        if (limit != null && limit > 0) {
             sql += "\nLIMIT " + limit;
         }
-
-        System.out.println("sql" + sql + "params" + params);
 
         return processFilmsQuery(sql, params);
     }

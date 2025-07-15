@@ -25,7 +25,6 @@ public class FilmService {
         return filmRepository.getById(id).orElseThrow(() -> new FilmNotFoundException("Film not found"));
     }
 
-
     public Film create(Film film) {
         log.info("Creating Film with name: {}", film.getName());
 

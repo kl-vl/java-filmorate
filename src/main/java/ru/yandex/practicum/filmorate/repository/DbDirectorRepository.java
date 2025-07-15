@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DbDirectorRepository {
 
-    private static final String SQL_SELECT_DIRECTOR_BY_ID = "SELECT id AS director_id, name AS director_name FROM \"director\" WHERE id = ? ORDER BY name";
+    private static final String SQL_SELECT_DIRECTOR_BY_ID = "SELECT id AS director_id, name AS director_name FROM \"director\" WHERE id = ?";
     private static final String SQL_SELECT_DIRECTOR_BY_FILM_ID = """
         SELECT d.id AS director_id, d.name AS director_name
         FROM "director" d
