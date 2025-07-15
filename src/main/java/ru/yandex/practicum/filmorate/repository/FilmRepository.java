@@ -20,7 +20,7 @@ public interface FilmRepository {
 
     boolean removeLike(Integer filmId, Integer userId);
 
-    List<Film> getPopularFilms(int count);
+    List<Film> getPopularFilms(Integer count, Integer year, Integer genreId);
 
     List<Film> findFilmsByDirectorId(int directorId, String sortBy);
 

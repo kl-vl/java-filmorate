@@ -153,6 +153,94 @@ public class DbFilmRepository implements FilmRepository {
     private static final String FIND_LIKED_FILM_IDS_BY_USER = "SELECT film_id FROM \"film_like\" WHERE user_id = ?";
     private static final String COUNT_LIKES_BY_FILM_ID = "SELECT COUNT(*) FROM \"film_like\" WHERE film_id = ?";
 
+    private static final String SQL_BEST_FILMS_FROM_GENRE_AND_YEAR = """
+            SELECT g.id AS genre_id,
+                   g.name AS genre_name,
+                   f.id AS film_id,
+                   m.id AS mpa_id,
+                   m.name AS mpa_name,
+                   f.name AS film_name,
+                   f.description,
+                   f.release_date,
+                   EXTRACT(YEAR FROM f.release_date) AS release_year,
+                   f.duration,
+                   COUNT(DISTINCT fl.user_id) AS film_like
+            FROM "film" AS f
+            JOIN "film_genre" AS fg ON f.id = fg.film_id
+            JOIN "genre" AS g ON fg.genre_id = g.id
+            JOIN "mpa" AS m ON f.mpa_id = m.id
+            LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
+            WHERE EXTRACT(YEAR FROM f.release_date) = ? AND g.id = ?
+            GROUP BY g.id,
+                     g.name,
+                     m.id,
+                     m.name,
+                     f.name,
+                     f.description,
+                     f.release_date,
+                     f.duration
+            ORDER BY film_like DESC
+            """;
+
+    private static final String SQL_FILMS_OF_YEAR = """
+            SELECT g.id AS genre_id,
+                   g.name AS genre_name,
+                   m.id AS mpa_id,
+                   m.name AS mpa_name,
+                   f.id AS film_id,
+                   f.name AS film_name,
+                   f.description,
+                   f.release_date,
+                   EXTRACT(YEAR FROM f.release_date) AS release_year,
+                   f.duration,
+                   COUNT(DISTINCT fl.user_id) AS film_like
+            FROM "film" AS f
+            JOIN "film_genre" AS fg ON f.id = fg.film_id
+            JOIN "genre" AS g ON fg.genre_id = g.id
+            JOIN "mpa" AS m ON f.mpa_id = m.id
+            LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
+            WHERE EXTRACT(YEAR FROM f.release_date) = ?
+            GROUP BY g.id,
+                     g.name,
+                     m.id,
+                     m.name,
+                     f.id,
+                     f.name,
+                     f.description,
+                     f.release_date,
+                     f.duration
+            ORDER BY film_like DESC
+            """;
+
+    private static final String SQL_FILMS_OF_GENRE = """
+            SELECT g.id AS genre_id,
+                   g.name AS genre_name,
+                   f.id AS film_id,
+                   m.id AS mpa_id,
+                   m.name AS mpa_name,
+                   f.name AS film_name,
+                   f.description,
+                   f.release_date,
+                   f.duration,
+                   COUNT(DISTINCT fl.user_id) AS film_like
+            FROM "film" AS f
+            LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
+            JOIN "film_genre" AS fg ON f.id = fg.film_id
+            JOIN "genre" AS g ON fg.genre_id = g.id
+            JOIN "mpa" AS m ON f.mpa_id = m.id
+            WHERE g.id = ?
+            GROUP BY g.id,
+                     g.name,
+                     f.id,
+                     m.id,
+                     m.name,
+                     f.name,
+                     f.description,
+                     f.release_date,
+                     f.duration
+            ORDER BY film_like DESC
+            """;
+
     private final JdbcTemplate jdbcTemplate;
     private final DbMpaRepository mpaRepository;
     private final DbGenreRepository genreRepository;
@@ -371,7 +459,29 @@ public class DbFilmRepository implements FilmRepository {
         return new ArrayList<>(filmsMap.values());
     }
 
-    public List<Film> getPopularFilms(int limit) {
+    public List<Film> getPopularFilms(Integer limit, Integer year, Integer genreId) {
+        String sql = "";
+        Object[] params = {};
+
+        if (year != null && genreId != null) {
+            sql = SQL_BEST_FILMS_FROM_GENRE_AND_YEAR;
+            params = new Object[]{year, genreId};
+
+        } else if (year != null) {
+            sql = SQL_FILMS_OF_YEAR;
+            params = new Object[]{year};
+
+        } else if (genreId != null) {
+            sql = SQL_FILMS_OF_GENRE;
+            params = new Object[]{genreId};
+        }
+
+        if (!sql.isEmpty() && (limit != null && limit > 0)) {
+            sql += "\nLIMIT " + limit;
+
+            return jdbcTemplate.query(sql, filmRowMapper, params);
+        }
+
         Map<Integer, Film> filmMap = new LinkedHashMap<>();
 
         jdbcTemplate.query(SQL_SELECT_FILM_POPULAR, rs -> {
