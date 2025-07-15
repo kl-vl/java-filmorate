@@ -141,7 +141,7 @@ class InMemoryFilmRepositoryTest {
         assertFalse(result);
     }
 
-    @Disabled
+    @Deprecated
     @Test
     void getPopularFils_shouldReturnOrderedFilmIdsByLikes() {
 
