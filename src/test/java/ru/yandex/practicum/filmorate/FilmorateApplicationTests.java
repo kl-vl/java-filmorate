@@ -10,21 +10,26 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.enums.EventOperation;
+import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.DbDirectorRepository;
+import ru.yandex.practicum.filmorate.repository.DbEventRepository;
 import ru.yandex.practicum.filmorate.repository.DbFilmRepository;
 import ru.yandex.practicum.filmorate.repository.DbGenreRepository;
 import ru.yandex.practicum.filmorate.repository.DbMpaRepository;
 import ru.yandex.practicum.filmorate.repository.DbReviewRepository;
 import ru.yandex.practicum.filmorate.repository.DbUserRepository;
 import ru.yandex.practicum.filmorate.repository.mappers.DirectorRowMapper;
+import ru.yandex.practicum.filmorate.repository.mappers.EventRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.repository.mappers.MpaRowMapper;
@@ -59,12 +64,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         DbMpaRepository.class,
         DbDirectorRepository.class,
         DbReviewRepository.class,
+        DbEventRepository.class,
         FilmRowMapper.class,
         UserRowMapper.class,
         GenreRowMapper.class,
         MpaRowMapper.class,
         DirectorRowMapper.class,
         ReviewRowMapper.class,
+        EventRowMapper.class,
         UserService.class,
         FilmService.class,
         RecommendationService.class
@@ -96,6 +103,7 @@ class FilmorateApplicationTests {
 
     @Autowired
     private RecommendationService recommendationService;
+    private DbEventRepository eventRepository;
 
     private User testUser1;
     private User testUser2;
@@ -482,9 +490,7 @@ class FilmorateApplicationTests {
         assertNotNull(createFilm.get());
 
         int filmId = createFilm.get().getId();
-
-        filmRepository.removeFilmById(filmId);
-
+        boolean res = filmRepository.removeFilmById(filmId);
         Optional<Film> optionalIsEmpty = filmRepository.getById(filmId);
 
         assertTrue(optionalIsEmpty.isEmpty());
@@ -546,7 +552,6 @@ class FilmorateApplicationTests {
         assertEquals(2, reviewList.size());
 
         Review review = reviewList.get(0);
-        System.out.println(review.toString());
 
         Assertions.assertThat(review).isNotNull()
                 .hasFieldOrPropertyWithValue("content", "Bad film")
@@ -620,6 +625,14 @@ class FilmorateApplicationTests {
                 .build();
         testReview1 = reviewRepository.create(review1).orElseThrow();
 
+        Event newEvent = Event.builder()
+                .eventType(EventType.REVIEW)
+                .operation(EventOperation.ADD)
+                .userId(testReview1.getUserId())
+                .entityId(testReview1.getReviewId())
+                .build();
+        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+
         Film film2 = filmRepository.create(testFilm2).orElseThrow();
         Review review2 = Review.builder()
                 .content("Bad film")
@@ -629,6 +642,14 @@ class FilmorateApplicationTests {
                 .build();
         testReview2 = reviewRepository.create(review2).orElseThrow();
 
+        newEvent = Event.builder()
+                .eventType(EventType.REVIEW)
+                .operation(EventOperation.ADD)
+                .userId(testReview2.getUserId())
+                .entityId(testReview2.getReviewId())
+                .build();
+        optEvent = eventRepository.addEvent(newEvent);
+
         Review review3 = Review.builder()
                 .content("Not Bad film")
                 .filmId(film2.getId())
@@ -636,6 +657,70 @@ class FilmorateApplicationTests {
                 .isPositive(true)
                 .build();
         testReview3 = reviewRepository.create(review3).orElseThrow();
+
+        newEvent = Event.builder()
+                .eventType(EventType.REVIEW)
+                .operation(EventOperation.ADD)
+                .userId(testReview3.getUserId())
+                .entityId(testReview3.getReviewId())
+                .build();
+        optEvent = eventRepository.addEvent(newEvent);
+    }
+
+    @Test
+    public void shouldAddToEventFeed() {
+        createReviews();
+        Integer userId3 = testUser3.getId();
+        List<Event> events = eventRepository.findAllByUserId(userId3,"asc");
+
+        assertEquals(2, events.size());
+
+        Assertions.assertThat(events.getFirst()).isNotNull()
+                .hasFieldOrPropertyWithValue("userId", userId3)
+                .hasFieldOrPropertyWithValue("eventType", EventType.REVIEW)
+                .hasFieldOrPropertyWithValue("operation", EventOperation.ADD)
+                .hasFieldOrPropertyWithValue("entityId", testReview1.getReviewId());
+
+        Review review = testReview1;
+        review.setContent("Very Good film");
+        testReview1 = reviewRepository.update(review).orElseThrow();
+        Event newEvent = Event.builder()
+                .eventType(EventType.REVIEW)
+                .operation(EventOperation.UPDATE)
+                .userId(testReview1.getUserId())
+                .entityId(testReview1.getReviewId())
+                .build();
+        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+
+        events = eventRepository.findAllByUserId(userId3,"desc");
+
+        assertEquals(3, events.size());
+
+        Assertions.assertThat(events.getFirst()).isNotNull()
+                .hasFieldOrPropertyWithValue("userId", userId3)
+                .hasFieldOrPropertyWithValue("eventType", EventType.REVIEW)
+                .hasFieldOrPropertyWithValue("operation", EventOperation.UPDATE)
+                .hasFieldOrPropertyWithValue("entityId", testReview1.getReviewId());
+
+        Integer reviewId1 = testReview1.getReviewId();
+        reviewRepository.deleteReview(reviewId1);
+        newEvent = Event.builder()
+                .eventType(EventType.REVIEW)
+                .operation(EventOperation.REMOVE)
+                .userId(userId3)
+                .entityId(reviewId1)
+                .build();
+        optEvent = eventRepository.addEvent(newEvent);
+
+        events = eventRepository.findAllByUserId(userId3,"desc");
+
+        assertEquals(4, events.size());
+
+        Assertions.assertThat(events.getFirst()).isNotNull()
+                .hasFieldOrPropertyWithValue("userId", userId3)
+                .hasFieldOrPropertyWithValue("eventType", EventType.REVIEW)
+                .hasFieldOrPropertyWithValue("operation", EventOperation.REMOVE)
+                .hasFieldOrPropertyWithValue("entityId", reviewId1);
     }
 
     @Test

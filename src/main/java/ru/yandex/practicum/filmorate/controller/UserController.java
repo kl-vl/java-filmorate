@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.FriendsService;
 import ru.yandex.practicum.filmorate.service.RecommendationService;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -33,6 +35,7 @@ public class UserController {
     private final UserService userService;
     private final FriendsService friendsService;
     private final RecommendationService recommendationService;
+    private final EventService eventService;
 
     public record FriendshipResponse(Integer user1Id, Integer user2Id, String status) {
     }
@@ -91,6 +94,10 @@ public class UserController {
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable Integer id) {
         return recommendationService.recommendFor(id);
+      
+    @GetMapping("/{userId}/feed")
+    public Collection<Event> getEvents(@PathVariable Integer userId) {
+        return eventService.getAll(userId);
     }
 
 }
