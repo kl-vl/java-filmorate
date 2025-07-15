@@ -150,6 +150,8 @@ public class DbFilmRepository implements FilmRepository {
     GROUP BY f.id, f.name, f.description, f.release_date, f.duration, m.id, m.name, g.id, g.name
     ORDER BY popularity DESC
     """;
+    private static final String FIND_LIKED_FILM_IDS_BY_USER = "SELECT film_id FROM \"film_like\" WHERE user_id = ?";
+    private static final String COUNT_LIKES_BY_FILM_ID = "SELECT COUNT(*) FROM \"film_like\" WHERE film_id = ?";
 
     private final JdbcTemplate jdbcTemplate;
     private final DbMpaRepository mpaRepository;
@@ -516,4 +518,14 @@ public class DbFilmRepository implements FilmRepository {
         return delete > 0;
     }
 
+    @Override
+    public List<Integer> findLikedFilmIdsByUser(Integer userId) {
+        return jdbcTemplate.queryForList(FIND_LIKED_FILM_IDS_BY_USER, Integer.class, userId);
+    }
+
+    @Override
+    public int countLikesByFilmId(Integer filmId) {
+        Integer cnt = jdbcTemplate.queryForObject(COUNT_LIKES_BY_FILM_ID, Integer.class, filmId);
+        return cnt == null ? 0 : cnt;
+    }
 }

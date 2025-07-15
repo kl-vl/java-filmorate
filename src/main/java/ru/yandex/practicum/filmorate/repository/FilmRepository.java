@@ -28,5 +28,7 @@ public interface FilmRepository {
 
     boolean removeFilmById(Integer id);
 
+    List<Integer> findLikedFilmIdsByUser(Integer userId);
 
+    int countLikesByFilmId(Integer filmId);
 }
