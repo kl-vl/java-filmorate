@@ -32,6 +32,7 @@ public interface FilmRepository {
     default List<Film> searchFilms(SearchCriteria criteria) {
         throw new UnsupportedOperationException("Method not implemented");
     }
+
     List<Integer> findLikedFilmIdsByUser(Integer userId);
 
     int countLikesByFilmId(Integer filmId);

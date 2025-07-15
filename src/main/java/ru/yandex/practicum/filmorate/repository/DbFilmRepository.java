@@ -206,12 +206,15 @@ public class DbFilmRepository implements FilmRepository {
                    f.release_date,
                    EXTRACT(YEAR FROM f.release_date) AS release_year,
                    f.duration,
+                   d.id AS director_id, d.name AS director_name,
                    COUNT(DISTINCT fl.user_id) AS film_like
             FROM "film" AS f
             JOIN "film_genre" AS fg ON f.id = fg.film_id
             JOIN "genre" AS g ON fg.genre_id = g.id
             JOIN "mpa" AS m ON f.mpa_id = m.id
             LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
+            LEFT JOIN "film_director" fd ON f.id = fd.film_id
+            LEFT JOIN "director" d ON fd.director_id = d.id
             WHERE EXTRACT(YEAR FROM f.release_date) = ? AND g.id = ?
             GROUP BY g.id,
                      g.name,
@@ -235,12 +238,15 @@ public class DbFilmRepository implements FilmRepository {
                    f.release_date,
                    EXTRACT(YEAR FROM f.release_date) AS release_year,
                    f.duration,
+                   d.id AS director_id, d.name AS director_name,
                    COUNT(DISTINCT fl.user_id) AS film_like
             FROM "film" AS f
             JOIN "film_genre" AS fg ON f.id = fg.film_id
             JOIN "genre" AS g ON fg.genre_id = g.id
             JOIN "mpa" AS m ON f.mpa_id = m.id
             LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
+            LEFT JOIN "film_director" fd ON f.id = fd.film_id
+            LEFT JOIN "director" d ON fd.director_id = d.i
             WHERE EXTRACT(YEAR FROM f.release_date) = ?
             GROUP BY g.id,
                      g.name,
@@ -264,12 +270,15 @@ public class DbFilmRepository implements FilmRepository {
                    f.description,
                    f.release_date,
                    f.duration,
+                   d.id AS director_id, d.name AS director_name,
                    COUNT(DISTINCT fl.user_id) AS film_like
             FROM "film" AS f
             LEFT JOIN "film_like" AS fl ON f.id = fl.film_id
             JOIN "film_genre" AS fg ON f.id = fg.film_id
             JOIN "genre" AS g ON fg.genre_id = g.id
             JOIN "mpa" AS m ON f.mpa_id = m.id
+            LEFT JOIN "film_director" fd ON f.id = fd.film_id
+            LEFT JOIN "director" d ON fd.director_id = d.id
             WHERE g.id = ?
             GROUP BY g.id,
                      g.name,
@@ -425,8 +434,7 @@ public class DbFilmRepository implements FilmRepository {
             sql += "\nLIMIT " + limit;
         }
 
-        return processFilmsQuery(sql, filmRowMapper, params);
-
+        return processFilmsQuery(sql, params);
     }
 
     @Override
