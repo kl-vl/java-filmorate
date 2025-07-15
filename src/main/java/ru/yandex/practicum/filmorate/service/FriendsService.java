@@ -29,10 +29,10 @@ public class FriendsService {
             throw new IllegalStateException("User cannot add themselves as a friend");
         }
 
-        User user = userRepository.get(userId)
+        User user = userRepository.getById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
 
-        User friend = userRepository.get(friendId)
+        User friend = userRepository.getById(friendId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + friendId + " not found"));
 
         if (userRepository.areFriends(userId, friendId)) {
@@ -57,10 +57,10 @@ public class FriendsService {
             throw new IllegalStateException("User cannot delete themselves from friend");
         }
 
-        User user = userRepository.get(userId)
+        User user = userRepository.getById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
 
-        User friend = userRepository.get(friendId)
+        User friend = userRepository.getById(friendId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + friendId + " not found"));
 
         if (!userRepository.areFriends(user.getId(), friend.getId())) {
@@ -82,7 +82,7 @@ public class FriendsService {
     }
 
     public List<User> getFriends(Integer userId) {
-        User user = userRepository.get(userId)
+        User user = userRepository.getById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
 
         return userRepository.getFriends(user.getId()).stream()
@@ -96,9 +96,9 @@ public class FriendsService {
         if (userId.equals(otherId)) {
             return Collections.emptyList();
         }
-        User user = userRepository.get(userId)
+        User user = userRepository.getById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
-        User otherUser = userRepository.get(otherId)
+        User otherUser = userRepository.getById(otherId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + otherId + " not found"));
 
         return userRepository.getCommonFriends(user.getId(), otherUser.getId()).stream()

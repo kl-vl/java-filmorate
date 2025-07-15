@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.exception.FilmCreateFailed;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.SearchCriteria;
 import ru.yandex.practicum.filmorate.repository.DbDirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
@@ -51,7 +52,7 @@ public class FilmService {
             throw new FilmNotFoundException("The Film with %s not found".formatted(film.getId()));
         }
 
-        Film updatedFilm = filmRepository.update(film).orElseThrow(() -> new FilmCreateFailed("Film update failed"));
+        Film updatedFilm = filmRepository.update(film).orElseThrow(() -> new FilmCreateFailed("Film update failed"));;
 
         log.info("Film updated successfully. ID : {}", updatedFilm.getId());
         log.debug("Film updated data: {}", updatedFilm);
@@ -60,6 +61,7 @@ public class FilmService {
     }
 
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
+        log.info("Getting film by director: {} with sort {}", directorId, sortBy);
         directorRepository.findById(directorId)
                 .orElseThrow(() -> new DirectorNotFoundException("Director not found with id: " + directorId));
 
@@ -80,4 +82,10 @@ public class FilmService {
 
         log.info("Удаление фильма с ID: {} прошло успешно", filmId);
     }
+
+    public List<Film> searchFilms(SearchCriteria criteria) {
+        log.info("Searc films by: {}", criteria.getSearchBy());
+        return filmRepository.searchFilms(criteria);
+    }
+
 }

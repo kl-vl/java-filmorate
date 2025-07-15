@@ -190,3 +190,15 @@ LEFT JOIN rate r ON f.rate_id = r.id
 ORDER BY f.likes_count DESC
 LIMIT 10;
 ```
+
+
+
+## Group project team
+- @kl-vl
+- @ArtemixSled
+- @avv37
+- @IRognarI
+- 
+
+## Project kanban
+https://github.com/users/kl-vl/projects/3/views/1
