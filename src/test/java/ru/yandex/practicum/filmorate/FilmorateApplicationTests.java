@@ -103,6 +103,8 @@ class FilmorateApplicationTests {
 
     @Autowired
     private RecommendationService recommendationService;
+
+    @Autowired
     private DbEventRepository eventRepository;
 
     private User testUser1;
