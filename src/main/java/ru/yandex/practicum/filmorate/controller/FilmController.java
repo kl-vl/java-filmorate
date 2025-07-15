@@ -106,19 +106,4 @@ public class FilmController {
         return filmService.searchFilms(SearchCriteria.from(query, by));
     }
 
-    @GetMapping("/popular?year={year}&genreId={genreId}")
-    public Collection<Film> bestFilmsFromGenreAndYear(@RequestParam Integer year, @RequestParam Integer genreID) {
-        return filmService.bestFilmsFromGenreAndYear(year, genreID);
-    }
-
-    @GetMapping("/popular?year={year}")
-    public Collection<Film> bestFilmsOfYear(@RequestParam Integer year) {
-        return filmService.bestFilmsOfYear(year);
-    }
-
-    @GetMapping("popular?genreId={genreId}")
-    public Collection<Film> bestFilmsOfGenre(@RequestParam Integer genreId) {
-        return filmService.bestFilmsOfGenre(genreId);
-    }
-
 }
