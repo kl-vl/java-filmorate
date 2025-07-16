@@ -106,12 +106,4 @@ public class FilmController {
         return filmService.searchFilms(SearchCriteria.from(query, by));
     }
 
-    @GetMapping("/search")
-    public List<Film> search(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "title,director") String[] by) {
-
-        return filmService.searchFilms(SearchCriteria.from(query, by));
-    }
-
 }
