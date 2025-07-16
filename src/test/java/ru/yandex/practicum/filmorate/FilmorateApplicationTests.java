@@ -110,6 +110,9 @@ class FilmorateApplicationTests {
     @Autowired
     private DbEventRepository eventRepository;
 
+    @Autowired
+    private FilmService filmService;
+
     private User testUser1;
     private User testUser2;
     private User testUser3;
@@ -341,7 +344,7 @@ class FilmorateApplicationTests {
     void validateMpa_ShouldThrowWhenInvalid() {
         testFilm1.setMpa(new Mpa(999, "Invalid"));
 
-        assertThrows(MpaNotFoundException.class, () -> filmRepository.create(testFilm1).orElseThrow());
+        assertThrows(MpaNotFoundException.class, () -> filmService.create(testFilm1));
     }
 
     @Test
@@ -349,7 +352,7 @@ class FilmorateApplicationTests {
         testFilm2.addGenre(new Genre(999, "Invalid Genre"));
 
         assertThrows(GenreNotFoundException.class,
-                () -> filmRepository.create(testFilm2));
+                () -> filmService.create(testFilm2));
     }
 
     @Test
