@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.enums.DirectorSortBy;
 import ru.yandex.practicum.filmorate.exception.FilmAccessException;
 import ru.yandex.practicum.filmorate.exception.FilmCreateFailed;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
@@ -24,6 +25,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -359,10 +361,6 @@ public class DbFilmRepository implements FilmRepository {
     @Override
     @Transactional
     public Optional<Film> create(Film film) {
-        mpaRepository.validateMpa(film.getMpa());
-        genreRepository.validateGenres(film.getGenres());
-        directorRepository.validateDirectors(film.getDirectors());
-
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
@@ -386,7 +384,7 @@ public class DbFilmRepository implements FilmRepository {
         return Optional.ofNullable(getFilmWithDetails(generatedId).orElseThrow(() -> new FilmCreateFailed("Film not created")));
     }
 
-
+    @Transactional
     public Optional<Film> update(Film film) {
         if (film.getId() == null) {
             throw new FilmValidationException("Film ID must be provided for update");
@@ -394,10 +392,6 @@ public class DbFilmRepository implements FilmRepository {
         if (!existsById(film.getId())) {
             throw new FilmNotFoundException("The Film with ID=%s not found".formatted(film.getId()));
         }
-
-        mpaRepository.validateMpa(film.getMpa());
-        genreRepository.validateGenres(film.getGenres());
-        directorRepository.validateDirectors(film.getDirectors());
 
         jdbcTemplate.update(
                 SQL_UPDATE_FILM,
@@ -455,7 +449,6 @@ public class DbFilmRepository implements FilmRepository {
         } else {
             sql = SQL_SELECT_FILM_POPULAR;
             params = new Object[]{limit != null && limit > 0 ? limit : DEFAULT_POPULAR_LIMIT};
-            System.out.println(limit);
         }
         return processFilmsQuery(sql, params);
     }
@@ -484,10 +477,15 @@ public class DbFilmRepository implements FilmRepository {
     }
 
     public List<Film> findFilmsByDirectorId(int directorId, String sortBy) {
-        String sql = switch (sortBy) {
-            case "year" -> SQL_SELECT_FILMS_BY_DIRECTOR_YEAR;
-            case "likes" -> SQL_SELECT_FILMS_BY_DIRECTOR_LIKES;
-            default -> throw new IllegalArgumentException("Invalid sort parameter: " + sortBy);
+        DirectorSortBy directorSortBy = DirectorSortBy.fromString(sortBy)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Invalid sort parameter. Allowed values: " +
+                                Arrays.toString(DirectorSortBy.values())
+                ));
+
+        String sql = switch (directorSortBy) {
+            case YEAR -> SQL_SELECT_FILMS_BY_DIRECTOR_YEAR;
+            case LIKES -> SQL_SELECT_FILMS_BY_DIRECTOR_LIKES;
         };
 
         return processFilmsQuery(sql, directorId);
@@ -503,9 +501,13 @@ public class DbFilmRepository implements FilmRepository {
 
     @Override
     public List<Film> searchFilms(SearchCriteria criteria) {
+        if (criteria == null || criteria.getFilmSearchBy() == null) {
+            throw new IllegalArgumentException("Search criteria must not be null");
+        }
+
         String queryParam = "%" + criteria.getQuery() + "%";
 
-        return switch (criteria.getSearchBy()) {
+        return switch (criteria.getFilmSearchBy()) {
             case TITLE -> jdbcTemplate.query(SEARCH_BY_TITLE_QUERY, filmRowMapper, queryParam);
             case DIRECTOR -> jdbcTemplate.query(SEARCH_BY_DIRECTOR_QUERY, filmRowMapper, queryParam);
             case BOTH -> jdbcTemplate.query(SEARCH_BY_BOTH_QUERY, filmRowMapper, queryParam, queryParam);

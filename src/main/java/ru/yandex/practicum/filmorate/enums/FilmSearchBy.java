@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.enums;
 
-public enum SearchBy {
+public enum FilmSearchBy {
     TITLE,
     DIRECTOR,
     BOTH

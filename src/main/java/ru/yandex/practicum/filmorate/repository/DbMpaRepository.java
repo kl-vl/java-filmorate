@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.repository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.repository.mappers.MpaRowMapper;
 
@@ -27,10 +26,11 @@ public class DbMpaRepository {
         return jdbcTemplate.query(SQL_SELECT_MPA_ORDER_BY_ID, mpaRowMapper);
     }
 
-    public void validateMpa(Mpa mpa) {
-        if (getMpaById(mpa.getId()).isEmpty()) {
-            throw new MpaNotFoundException("MPA rating with id " + mpa.getId() + " not found");
+    public boolean validateMpa(Mpa mpa) {
+        if (mpa == null || mpa.getId() == null) {
+            return false;
         }
+        return getMpaById(mpa.getId()).isPresent();
     }
 
 }

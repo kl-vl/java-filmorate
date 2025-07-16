@@ -1,16 +1,15 @@
 package ru.yandex.practicum.filmorate.repository;
 
-import jakarta.validation.ValidationException;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.mappers.GenreRowMapper;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -78,24 +77,17 @@ public class DbGenreRepository {
         );
     }
 
-    public void validateGenres(Set<Genre> genres) {
+    public boolean validateGenres(Set<Genre> genres) {
+        if (genres == null || genres.isEmpty()) {
+            return true;
+        }
+
         Set<Integer> genreIds = genres.stream()
                 .map(Genre::getId)
                 .collect(Collectors.toSet());
 
-        if (genreIds.size() != genres.size()) {
-            throw new ValidationException("Duplicate genre ids found");
-        }
-
-        List<Integer> existingIds = findAllExistingIds(genreIds);
-
-        Set<Integer> missingIds = genreIds.stream()
-                .filter(id -> !existingIds.contains(id))
-                .collect(Collectors.toSet());
-
-        if (!missingIds.isEmpty()) {
-            throw new GenreNotFoundException("Genres not found with ids: " + missingIds);
-        }
+        Set<Integer> existingIds = new HashSet<>(findAllExistingIds(genreIds));
+        return existingIds.containsAll(genreIds);
     }
 
 }

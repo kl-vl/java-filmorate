@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.enums.DirectorSortBy;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.SearchCriteria;
 import ru.yandex.practicum.filmorate.service.FilmLikeService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -88,11 +90,12 @@ public class FilmController {
             @PathVariable int directorId,
             @RequestParam(defaultValue = "year") String sortBy) {
 
-        if (!"year".equals(sortBy) && !"likes".equals(sortBy)) {
-            throw new IllegalArgumentException("Invalid sort parameter. Allowed values: [year, likes]");
-        }
+        DirectorSortBy directorSortBy = DirectorSortBy.fromString(sortBy)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Invalid sort parameter. Allowed values: " + Arrays.toString(DirectorSortBy.values())
+                ));
 
-        return filmService.getFilmsByDirector(directorId, sortBy);
+        return filmService.getFilmsByDirector(directorId, directorSortBy.name().toLowerCase());
     }
 
     @GetMapping("/search")

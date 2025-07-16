@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS "film" (
     description VARCHAR(200),
     release_date DATE NOT NULL,
     duration INTEGER NOT NULL CHECK (duration > 0),
-    --likes_count INTEGER NOT NULL DEFAULT 0,
     CONSTRAINT fk_film_mpa FOREIGN KEY (mpa_id) REFERENCES "mpa"(id)
 );
 

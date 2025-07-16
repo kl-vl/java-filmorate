@@ -1,10 +1,68 @@
 # Filmorate
-Simple service with REST API, works with films and user ratings, as well as return the top-5 recommended films to watch.
+Simple service with REST API, works with films and user ratings, likes and recommendations, and event log.
+
+## Group project team at Sprint 13
+- @kl-vl
+- @ArtemixSled
+- @avv37
+- @IRognarI
+
+## Project kanban
+https://github.com/users/kl-vl/projects/3/views/1
 
 ### Entities 
 1. User
+- ID - User identifier;
+- NAME - User name;
+- LOGIN - User login;
+- EMAIL - Email address;
+- BIRTHDAY - Date of birth;
+- 
 2. Film
+- ID - Film identifier;
+- NAME - Film title;
+- DESCRIPTION - Film description;
+- RELEASE_DATE - Release date of the film;
+- DURATION - Film duration;
+- MPA_ID - Film rating;
 
+3. Genre
+- ID - Film identifier;
+- NAME - Genre name;
+
+4. MPA_RATING
+- ID - Rating identifier;
+- NAME - Rating name;
+
+5. FRIENDSHIP
+- USER_ID - User identifier;
+- FRIEND_ID - Friend identifier;
+- ACCEPTED - Friendship status;
+
+6. FILM_LIKE
+- FILM_ID - User identifier;
+- USER_ID - Film identifier; 
+
+7. DIRECTOR
+- ID - Director identifier;
+- NAME - Director name;
+ 
+8. FILM_DIRECTOR
+- FILM_ID - Film identifier;
+- DIRECTOR_ID - Director identifier;
+
+9. REVIEW
+- ID - Review identifier;
+- FILM_ID - Film identifier;
+- USER_ID - User identifier;
+- CONTENT - Review content;
+- IS_POSITIVE - Positive/negative review;
+- USEFUL - Rating of review;
+
+10. 0REVIEW_LIKE
+- REVIEW_ID - Rating identifier;
+- USER_ID - User identifier;
+- IS_DISLIKE - Dislike flag;
 
 ## Application functions:
 ## Film

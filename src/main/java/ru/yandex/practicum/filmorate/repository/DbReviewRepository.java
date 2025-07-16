@@ -82,8 +82,7 @@ public class DbReviewRepository {
                 review.getIsPositive(),
                 id
         );
-        Optional<Review> optReview = getReviewById(id);
-        return optReview.isPresent() ? optReview : Optional.empty();
+        return getReviewById(id);
     }
 
     public Optional<Review> getReviewById(Integer id) {

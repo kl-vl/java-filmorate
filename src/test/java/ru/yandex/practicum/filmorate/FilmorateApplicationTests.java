@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.filmorate.enums.SearchBy;
+import ru.yandex.practicum.filmorate.enums.FilmSearchBy;
 import ru.yandex.practicum.filmorate.enums.EventOperation;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
@@ -818,7 +818,7 @@ class FilmorateApplicationTests {
 
         @Test
         void searchByTitle_shouldFindTwoFilmsWithWordKrad() {
-            SearchCriteria criteria = new SearchCriteria("крад", SearchBy.TITLE);
+            SearchCriteria criteria = new SearchCriteria("крад", FilmSearchBy.TITLE);
             List<Film> result = filmRepository.searchFilms(criteria);
 
             assertEquals(2, result.size(), "Должно найти 2 фильма с 'крад' в названии");
@@ -828,7 +828,7 @@ class FilmorateApplicationTests {
 
         @Test
         void searchByDirector_shouldFindFilmByDirectorEngLi() {
-            SearchCriteria criteria = new SearchCriteria("Энг", SearchBy.DIRECTOR);
+            SearchCriteria criteria = new SearchCriteria("Энг", FilmSearchBy.DIRECTOR);
             List<Film> result = filmRepository.searchFilms(criteria);
 
             assertEquals(1, result.size());
@@ -837,7 +837,7 @@ class FilmorateApplicationTests {
 
         @Test
         void searchByBoth_shouldFindAllFilmsWithWordKrad() {
-            SearchCriteria criteria = new SearchCriteria("крад", SearchBy.BOTH);
+            SearchCriteria criteria = new SearchCriteria("крад", FilmSearchBy.BOTH);
             List<Film> result = filmRepository.searchFilms(criteria);
 
             assertEquals(2, result.size());
@@ -847,16 +847,15 @@ class FilmorateApplicationTests {
 
         @Test
         void searchByTitle_shouldBeCaseInsensitive() {
-            SearchCriteria criteria = new SearchCriteria("КРАД", SearchBy.TITLE);
+            SearchCriteria criteria = new SearchCriteria("КРАД", FilmSearchBy.TITLE);
             List<Film> result = filmRepository.searchFilms(criteria);
 
-            System.out.println(result);
             assertEquals(2, result.size());
         }
 
         @Test
         void search_shouldReturnEmptyListWhenNoMatches() {
-            SearchCriteria criteria = new SearchCriteria("несуществующий", SearchBy.BOTH);
+            SearchCriteria criteria = new SearchCriteria("несуществующий", FilmSearchBy.BOTH);
             List<Film> result = filmRepository.searchFilms(criteria);
 
             assertTrue(result.isEmpty());
