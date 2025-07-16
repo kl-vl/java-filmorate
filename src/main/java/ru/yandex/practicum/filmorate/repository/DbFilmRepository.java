@@ -80,12 +80,12 @@ public class DbFilmRepository implements FilmRepository {
                 GROUP BY f.id
             ),
             top_film_ids AS (
-                SELECT id 
-                FROM film_popularity 
-                ORDER BY popularity DESC 
+                SELECT id
+                FROM film_popularity
+                ORDER BY popularity DESC
                 LIMIT ?
             )
-            SELECT 
+            SELECT
                 f.id AS film_id,
                 f.name AS film_name,
                 f.description,
@@ -217,10 +217,10 @@ public class DbFilmRepository implements FilmRepository {
                 SELECT DISTINCT f.id
                 FROM "film" f
                 JOIN "film_genre" fg ON f.id = fg.film_id
-                WHERE EXTRACT(YEAR FROM f.release_date) = ? 
+                WHERE EXTRACT(YEAR FROM f.release_date) = ?
                   AND fg.genre_id = ?
             )
-            SELECT 
+            SELECT
                 f.id AS film_id,
                 f.name AS film_name,
                 f.description,
@@ -231,7 +231,7 @@ public class DbFilmRepository implements FilmRepository {
                 m.name AS mpa_name,
                 g.id AS genre_id,
                 g.name AS genre_name,
-                d.id AS director_id, 
+                d.id AS director_id,
                 d.name AS director_name,
                 COUNT(DISTINCT fl.user_id) AS film_like
             FROM "film" f
@@ -242,7 +242,7 @@ public class DbFilmRepository implements FilmRepository {
             LEFT JOIN "film_like" fl ON f.id = fl.film_id
             LEFT JOIN "film_director" fd ON f.id = fd.film_id
             LEFT JOIN "director" d ON fd.director_id = d.id
-            GROUP BY 
+            GROUP BY
                 f.id,
                 f.name,
                 f.description,
