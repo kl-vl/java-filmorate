@@ -321,6 +321,7 @@ public class DbFilmRepository implements FilmRepository {
                    m.id, m.name, g.id, g.name, d.id, d.name
                ORDER BY film_like DESC
             """;
+    public static final Integer DEFAULT_POPULAR_LIMIT = 10;
     private final JdbcTemplate jdbcTemplate;
     private final DbMpaRepository mpaRepository;
     private final DbGenreRepository genreRepository;
@@ -453,7 +454,8 @@ public class DbFilmRepository implements FilmRepository {
             params = new Object[]{genreId};
         } else {
             sql = SQL_SELECT_FILM_POPULAR;
-            params = new Object[]{limit != null && limit > 0 ? limit : 10}; // TODO default 10
+            params = new Object[]{limit != null && limit > 0 ? limit : DEFAULT_POPULAR_LIMIT};
+            System.out.println(limit);
         }
         return processFilmsQuery(sql, params);
     }

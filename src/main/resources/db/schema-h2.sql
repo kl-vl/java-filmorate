@@ -88,8 +88,8 @@ CREATE TABLE IF NOT EXISTS "review" (
 
 -- review_likes
 CREATE TABLE IF NOT EXISTS "review_likes" (
-    user_id      INTEGER NOT NULL REFERENCES "user"(id),
-    review_id    INTEGER NOT NULL REFERENCES "review"(id),
+    user_id      INTEGER NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    review_id    INTEGER NOT NULL REFERENCES "review"(id) ON DELETE CASCADE,
     is_like      BOOLEAN DEFAULT false,
     is_dislike   BOOLEAN DEFAULT false,
     PRIMARY KEY (user_id, review_id)

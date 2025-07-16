@@ -35,10 +35,7 @@ public class FilmLikeService {
             throw new UserNotFoundException("The User with %s does not exists to like film".formatted(userId));
         }
 
-        if (!filmRepository.addLike(filmId, userId)) {
-            // TODO develop test fail
-            //throw new IllegalStateException("User %s already liked the film with ID %s".formatted(userId, filmId));
-        }
+        filmRepository.addLike(filmId, userId);
 
         Event newEvent = Event.builder()
                 .eventType(EventType.LIKE)
