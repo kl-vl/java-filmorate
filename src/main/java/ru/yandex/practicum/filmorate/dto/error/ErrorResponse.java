@@ -10,16 +10,16 @@ import java.util.Map;
 @AllArgsConstructor
 public class ErrorResponse {
     private final String message;
-    private final String errorType;
+    private final String error;
     private final LocalDateTime timestamp;
     private final Map<String, String> details;
 
-    public ErrorResponse(String message, String errorType) {
-        this(message, errorType, LocalDateTime.now(), null);
+    public ErrorResponse(String message, String error) {
+        this(message, error, LocalDateTime.now(), null);
     }
 
-    public ErrorResponse(String message, String errorType, Map<String, String> details) {
-        this(message, errorType, LocalDateTime.now(), details);
+    public ErrorResponse(String message, String error, Map<String, String> details) {
+        this(message, error, LocalDateTime.now(), details);
     }
 
 }

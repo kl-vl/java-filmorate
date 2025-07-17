@@ -1,14 +1,14 @@
 package ru.yandex.practicum.filmorate.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserCreateFailed;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -26,6 +26,15 @@ public class UserService {
         log.debug("User created data: {}", createdUser);
 
         return createdUser;
+    }
+
+    public User getUserById(Integer userId) {
+        if (userId == null) {
+            throw new UserNotFoundException("ID должен быть указан");
+        }
+
+        return repository.getById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с id { " + userId + " } - не найден"));
     }
 
     public List<User> getList() {
@@ -46,6 +55,20 @@ public class UserService {
         log.debug("User updated data: {}", updatedUser);
 
         return updatedUser;
+    }
+
+    public void removeUserById(Integer userId) {
+        log.info("Удаление пользователя с ID: {}", userId);
+
+        if (userId == null) {
+            throw new UserValidationException("ID пользователя должен быть указан");
+        }
+
+        if (!repository.removeUserById(userId)) {
+            throw new UserNotFoundException("Пользователь с id { " + userId + " } - не найден");
+        }
+
+        log.info("Удаление пользователя с ID: {} прошло успешно", userId);
     }
 
 }

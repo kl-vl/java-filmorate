@@ -89,8 +89,9 @@ public class InMemoryFilmRepository implements FilmRepository {
         return likes.getOrDefault(filmId, Collections.emptySet()).contains(userId);
     }
 
+    @Deprecated
     @Override
-    public List<Film> getPopularFilms(int count) {
+    public List<Film> getPopularFilms(Integer count, Integer year, Integer genreId) {
         return likes.entrySet().stream()
                 .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
                 .limit(count)
@@ -99,4 +100,31 @@ public class InMemoryFilmRepository implements FilmRepository {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return List.of();
+    }
+
+    @Override
+    public List<Film> findFilmsByDirectorId(int directorId, String sortBy) {
+        throw new UnsupportedOperationException("This method is not implemented.");
+    }
+
+    @Override
+    public boolean removeFilmById(Integer filmId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Integer> findLikedFilmIdsByUser(Integer userId) {
+        return likes.entrySet().stream()
+                .filter(entry -> entry.getValue().contains(userId))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public int countLikesByFilmId(Integer filmId) {
+        return likes.getOrDefault(filmId, Collections.emptySet()).size();
+    }
 }
