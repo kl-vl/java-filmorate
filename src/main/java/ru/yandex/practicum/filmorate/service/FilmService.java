@@ -71,8 +71,10 @@ public class FilmService {
 
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
         log.info("Getting film by director: {} with sort {}", directorId, sortBy);
-        directorRepository.findById(directorId)
-                .orElseThrow(() -> new DirectorNotFoundException("Director not found with id: " + directorId));
+        boolean directorExists = directorRepository.existsById(directorId);
+        if (!directorExists) {
+            throw new DirectorNotFoundException("Director not found with id: " + directorId);
+        }
 
         return filmRepository.findFilmsByDirectorId(directorId, sortBy);
     }
