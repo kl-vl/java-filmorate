@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.dto.error.ErrorResponse;
+import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmCreateFailed;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmValidationException;
@@ -74,6 +75,15 @@ public class FilmControllerAdvice {
         log.warn("Film Validation error in {}: {}", request.getDescription(false), ex.getMessage());
 
         return new ErrorResponse(ex.getMessage(), "FILM_INVALID_DATA");
+    }
+
+    @ExceptionHandler(DirectorNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleDirectorNotFound(DirectorNotFoundException ex, WebRequest request) {
+
+        log.warn("Director not found in {}: {}", request.getDescription(false), ex.getMessage());
+
+        return new ErrorResponse(ex.getMessage(), "DIRECTOR_NOT_FOUND");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

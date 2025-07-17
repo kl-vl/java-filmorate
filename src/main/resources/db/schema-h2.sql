@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS "film" (
     description VARCHAR(200),
     release_date DATE NOT NULL,
     duration INTEGER NOT NULL CHECK (duration > 0),
-    --likes_count INTEGER NOT NULL DEFAULT 0,
     CONSTRAINT fk_film_mpa FOREIGN KEY (mpa_id) REFERENCES "mpa"(id)
 );
 
@@ -88,8 +87,8 @@ CREATE TABLE IF NOT EXISTS "review" (
 
 -- review_likes
 CREATE TABLE IF NOT EXISTS "review_likes" (
-    user_id      INTEGER NOT NULL REFERENCES "user"(id),
-    review_id    INTEGER NOT NULL REFERENCES "review"(id),
+    user_id      INTEGER NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    review_id    INTEGER NOT NULL REFERENCES "review"(id) ON DELETE CASCADE,
     is_like      BOOLEAN DEFAULT false,
     is_dislike   BOOLEAN DEFAULT false,
     PRIMARY KEY (user_id, review_id)

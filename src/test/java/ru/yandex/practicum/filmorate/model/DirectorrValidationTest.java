@@ -40,8 +40,6 @@ class DirectorrValidationTest {
 
         Set<ConstraintViolation<Director>> violations = validator.validate(director);
 
-        System.out.println(violations);
-
         assertAll("Blank name",
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream()

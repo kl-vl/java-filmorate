@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.enums.EventOperation;
 import ru.yandex.practicum.filmorate.enums.EventType;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ReviewCreateFailed;
 import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ReviewValidationException;
@@ -17,8 +16,8 @@ import ru.yandex.practicum.filmorate.repository.DbReviewRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +30,7 @@ public class ReviewService {
     private final DbEventRepository eventRepository;
 
     public Review addReview(Review review) {
-        log.debug("Создание нового отзыва: filmId = {}, userId = {}, content = {}",
+        log.info("Создание нового отзыва: filmId = {}, userId = {}, content = {}",
                 review.getFilmId(), review.getUserId(), review.getContent());
         checkReviewWithoutIdOrThrow(review);
         Review newReview = reviewRepository.create(review)
@@ -43,15 +42,14 @@ public class ReviewService {
                 .userId(newReview.getUserId())
                 .entityId(newReview.getReviewId())
                 .build();
-        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+        eventRepository.addEvent(newEvent);
 
-        log.info("Отзыв создан, reviewId = {}", newReview.getReviewId());
-        log.debug("Создан отзыв {}", newReview);
+        log.info("Создан отзыв {}", newReview);
         return newReview;
     }
 
     public Review updateReview(Review review) {
-        log.debug("Изменение отзыва: reviewId = {}, content = {}, isPositive = {}",
+        log.info("Изменение отзыва: reviewId = {}, content = {}, isPositive = {}",
                 review.getReviewId(), review.getContent(), review.getIsPositive());
         checkReviewOrThrow(review);
 
@@ -64,21 +62,20 @@ public class ReviewService {
                 .userId(newReview.getUserId())
                 .entityId(newReview.getReviewId())
                 .build();
-        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+        eventRepository.addEvent(newEvent);
 
-        log.info("Отзыв изменен, reviewId = {}", newReview.getReviewId());
-        log.debug("Изменен отзыв {}", newReview);
+        log.info("Изменен отзыв {}", newReview);
         return newReview;
     }
 
     public Review getReviewById(Integer id) {
-        log.debug("getReviewById {}", id);
+        log.info("getReviewById {}", id);
         return reviewRepository.getReviewById(id)
                 .orElseThrow(() -> new ReviewNotFoundException("Отзыв с id = " + id + " не найден"));
     }
 
     public boolean deleteReview(Integer id) {
-        log.debug("deleteReview {}", id);
+        log.info("deleteReview {}", id);
         Review review = getReviewById(id);
         boolean res = reviewRepository.deleteReview(id);
 
@@ -88,25 +85,25 @@ public class ReviewService {
                 .userId(review.getUserId())
                 .entityId(review.getReviewId())
                 .build();
-        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+        eventRepository.addEvent(newEvent);
 
         return res;
     }
 
     public List<Review> getAll(Integer filmId, Integer limit) {
-        log.debug("getAll, filmId = {}, limit = {}", filmId, limit);
+        log.info("getAll, filmId = {}, limit = {}", filmId, limit);
         if (filmId == null) {
             return reviewRepository.getAllWithLimit(limit);
         } else {
             if (!filmRepository.existsById(filmId)) {
-                throw new FilmNotFoundException("Фильм с id = " + filmId + " не найден");
+                return new ArrayList<>();
             }
             return reviewRepository.getAllByFilmIdWithLimit(filmId, limit);
         }
     }
 
     public boolean addLike(Integer userId, Integer reviewId) {
-        log.debug("addLike, userId = {}, reviewId = {}", userId, reviewId);
+        log.info("addLike, userId = {}, reviewId = {}", userId, reviewId);
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("Юзер с id = " + userId + " не найден");
         }
@@ -116,12 +113,12 @@ public class ReviewService {
         }
         boolean isDislike = reviewRepository.isDislike(userId, reviewId);
         Integer add = isDislike ? 2 : 1;
-        log.debug("addLike, isDislike = {}, isLike = {}, add = {}", isDislike, isLike, add);
+        log.info("addLike, isDislike = {}, isLike = {}, add = {}", isDislike, isLike, add);
         return reviewRepository.like(userId, reviewId, add);
     }
 
     public boolean addDislike(Integer userId, Integer reviewId) {
-        log.debug("addDislike, userId = {}, reviewId = {}", userId, reviewId);
+        log.info("addDislike, userId = {}, reviewId = {}", userId, reviewId);
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("Юзер с id = " + userId + " не найден");
         }
@@ -131,12 +128,12 @@ public class ReviewService {
         }
         boolean isLike = reviewRepository.isLike(userId, reviewId);
         Integer deduct = isLike ? 2 : 1;
-        log.debug("addDislike, isLike = {}, isDislike = {}, deduct = {}", isLike, isDislike, deduct);
+        log.info("addDislike, isLike = {}, isDislike = {}, deduct = {}", isLike, isDislike, deduct);
         return reviewRepository.dislike(userId, reviewId, deduct);
     }
 
     public boolean likeOff(Integer userId, Integer reviewId) {
-        log.debug("likeOff, userId = {}, reviewId = {}", userId, reviewId);
+        log.info("likeOff, userId = {}, reviewId = {}", userId, reviewId);
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("Юзер с id = " + userId + " не найден");
         }
@@ -147,7 +144,7 @@ public class ReviewService {
     }
 
     public boolean dislikeOff(Integer userId, Integer reviewId) {
-        log.debug("dislikeOff, userId = {}, reviewId = {}", userId, reviewId);
+        log.info("dislikeOff, userId = {}, reviewId = {}", userId, reviewId);
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("Юзер с id = " + userId + " не найден");
         }

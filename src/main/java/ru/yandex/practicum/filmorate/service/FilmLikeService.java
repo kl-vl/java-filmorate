@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -25,6 +24,8 @@ public class FilmLikeService {
     private final DbEventRepository eventRepository;
 
     public boolean addLike(Integer filmId, Integer userId) {
+        log.info("addLike for film {} by user {}", filmId, userId);
+
         if (!filmRepository.existsById(filmId)) {
             throw new FilmNotFoundException("The Film with %s not found to like".formatted(filmId));
         }
@@ -33,9 +34,7 @@ public class FilmLikeService {
             throw new UserNotFoundException("The User with %s does not exists to like film".formatted(userId));
         }
 
-        if (!filmRepository.addLike(filmId, userId)) {
-            throw new IllegalStateException("User %s already liked the film with ID %s".formatted(userId, filmId));
-        }
+        filmRepository.addLike(filmId, userId);
 
         Event newEvent = Event.builder()
                 .eventType(EventType.LIKE)
@@ -43,12 +42,14 @@ public class FilmLikeService {
                 .userId(userId)
                 .entityId(filmId)
                 .build();
-        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+        eventRepository.addEvent(newEvent);
 
         return true;
     }
 
     public boolean removeLike(Integer filmId, Integer userId) {
+        log.info("removeLike for film {} by user {}", filmId, userId);
+
         if (!filmRepository.existsById(filmId)) {
             throw new FilmNotFoundException("Film with ID %s not found to remove like".formatted(filmId));
         }
@@ -65,16 +66,18 @@ public class FilmLikeService {
                 .userId(userId)
                 .entityId(filmId)
                 .build();
-        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+        eventRepository.addEvent(newEvent);
 
         return res;
     }
 
-    public List<Film> getPopularFilms(int count) {
-        return filmRepository.getPopularFilms(count);
+    public List<Film> getPopularFilms(Integer count, Integer year, Integer genreId) {
+        log.info("getPopularFilms with limit: {} {} {}", count, year, genreId);
+        return filmRepository.getPopularFilms(count, year, genreId);
     }
 
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        log.info("getCommonFilms by users: {} {}", userId, friendId);
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("Пользователь с ID=" + userId + " не найден");
         }

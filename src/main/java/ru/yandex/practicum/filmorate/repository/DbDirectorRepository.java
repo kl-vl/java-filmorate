@@ -14,27 +14,28 @@ import ru.yandex.practicum.filmorate.repository.mappers.DirectorRowMapper;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Primary
-@Repository
+@Repository("dbDirectorRepository")
 @RequiredArgsConstructor
 public class DbDirectorRepository {
 
-    private static final String SQL_SELECT_DIRECTOR_BY_ID = "SELECT id as director_id, name as director_name FROM \"director\" WHERE id = ?";
+    private static final String SQL_SELECT_DIRECTOR_BY_ID = "SELECT id AS director_id, name AS director_name FROM \"director\" WHERE id = ?";
     private static final String SQL_SELECT_DIRECTOR_BY_FILM_ID = """
-        SELECT d.id as director_id, d.name as director_name
-        FROM "director" d
-        JOIN "film_director" fd ON d.id = fd.director_id
-        WHERE fd.film_id = ?
-        ORDER BY d.id ASC
-        """;
+            SELECT d.id AS director_id, d.name AS director_name
+            FROM "director" d
+            JOIN "film_director" fd ON d.id = fd.director_id
+            WHERE fd.film_id = ?
+            ORDER BY d.id ASC
+            """;
     private static final String SQL_DELETE_FILM_DIRECTOR_BY_FILM_ID = "DELETE FROM \"film_director\" WHERE film_id = ?";
     private static final String SQL_INSERT_FILM_DIRECTOR = "INSERT INTO \"film_director\" (film_id, director_id) VALUES (?, ?)";
-    private static final String SQL_SELECT_DIRECTOR_ORDER_BY_ID = "SELECT id as director_id, name as director_name FROM \"director\" ORDER BY id ASC";
+    private static final String SQL_SELECT_DIRECTOR_ORDER_BY_ID = "SELECT id AS director_id, name AS director_name FROM \"director\" ORDER BY id ASC";
     private static final String SQL_INSERT_DIRECTOR = "INSERT INTO \"director\" (name) VALUES (?)";
     private static final String SQL_UPDATE_DIRECTOR = "UPDATE \"director\" SET name = ? WHERE id = ?";
     private static final String SQL_DELETE_DIRECTOR = "DELETE FROM \"director\" WHERE id = ?";
@@ -63,18 +64,18 @@ public class DbDirectorRepository {
         return jdbcTemplate.query(SQL_SELECT_DIRECTOR_BY_FILM_ID, directorRowMapper, filmId);
     }
 
+    @Transactional
     public void saveFilmDirectors(Film film, boolean isUpdate) {
         if (isUpdate) {
             jdbcTemplate.update(SQL_DELETE_FILM_DIRECTORS, film.getId());
         }
 
-            List<Object[]> batchArgs = film.getDirectors().stream()
-                    .map(d -> new Object[]{film.getId(), d.getId()})
-                    .collect(Collectors.toList());
+        List<Object[]> batchArgs = film.getDirectors().stream()
+                .map(d -> new Object[]{film.getId(), d.getId()})
+                .collect(Collectors.toList());
 
-            jdbcTemplate.batchUpdate(SQL_INSERT_FILM_DIRECTOR, batchArgs);
+        jdbcTemplate.batchUpdate(SQL_INSERT_FILM_DIRECTOR, batchArgs);
     }
-
 
     public List<Integer> findAllExistingIds(Set<Integer> ids) {
         if (ids.isEmpty()) {
@@ -107,21 +108,36 @@ public class DbDirectorRepository {
         if (affectedRows == 0 || keyHolder.getKey() == null) {
             return Optional.empty();
         }
-
-        director.setId(keyHolder.getKey().intValue());
-        return Optional.of(director);
+        int createdId = keyHolder.getKey().intValue();
+        director.setId(createdId);
+        return findById(createdId);
     }
 
+    @Transactional
     public Optional<Director> update(Director director) {
         int updated = jdbcTemplate.update(SQL_UPDATE_DIRECTOR,
                 director.getName(),
                 director.getId());
-        return updated == 1 ? Optional.of(director) : Optional.empty();
+        return updated == 1 ? findById(director.getId()) : Optional.empty();
     }
 
+    @Transactional
     public boolean deleteById(int id) {
         int rowsAffected = jdbcTemplate.update(SQL_DELETE_DIRECTOR, id);
         return rowsAffected > 0;
     }
 
+    public boolean validateDirectors(Set<Director> directors) {
+        if (directors == null || directors.isEmpty()) {
+            return true;
+        }
+
+        Set<Integer> directorIds = directors.stream()
+                .map(Director::getId)
+                .collect(Collectors.toSet());
+
+        Set<Integer> existingIds = new HashSet<>(findAllExistingIds(directorIds));
+
+        return existingIds.containsAll(directorIds);
+    }
 }

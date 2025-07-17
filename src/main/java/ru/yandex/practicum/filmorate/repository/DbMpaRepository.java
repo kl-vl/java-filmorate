@@ -13,8 +13,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DbMpaRepository {
 
-    private static final String SQL_SELECT_MPA_BY_ID = "SELECT id as mpa_id, name as mpa_name FROM \"mpa\" WHERE id = ?";
-    private static final String SQL_SELECT_MPA_ORDER_BY_ID = "SELECT id as mpa_id, name as mpa_name FROM \"mpa\" ORDER BY id ASC";
+    private static final String SQL_SELECT_MPA_BY_ID = "SELECT id AS mpa_id, name AS mpa_name FROM \"mpa\" WHERE id = ?";
+    private static final String SQL_SELECT_MPA_ORDER_BY_ID = "SELECT id AS mpa_id, name AS mpa_name FROM \"mpa\" ORDER BY id ASC";
     private final JdbcTemplate jdbcTemplate;
     private final MpaRowMapper mpaRowMapper;
 
@@ -25,4 +25,12 @@ public class DbMpaRepository {
     public List<Mpa> getAllMpa() {
         return jdbcTemplate.query(SQL_SELECT_MPA_ORDER_BY_ID, mpaRowMapper);
     }
+
+    public boolean validateMpa(Mpa mpa) {
+        if (mpa == null || mpa.getId() == null) {
+            return false;
+        }
+        return getMpaById(mpa.getId()).isPresent();
+    }
+
 }

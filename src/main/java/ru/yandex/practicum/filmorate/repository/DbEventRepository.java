@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.enums.SortOrder;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.repository.mappers.EventRowMapper;
 
@@ -48,8 +49,8 @@ public class DbEventRepository {
         return Optional.of(event);
     }
 
-    public List<Event> findAllByUserId(Integer userId, String direct) {
-        if (direct.equalsIgnoreCase("desc")) {
+    public List<Event> findAllByUserId(Integer userId, SortOrder direct) {
+        if (direct == SortOrder.DESC) {
             return jdbcTemplate.query(SQL_SELECT_EVENTS_BY_USERID_DESC, eventRowMapper, userId);
         } else {
             return jdbcTemplate.query(SQL_SELECT_EVENTS_BY_USERID_ASC, eventRowMapper, userId);

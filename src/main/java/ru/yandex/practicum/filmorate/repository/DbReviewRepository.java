@@ -21,8 +21,7 @@ public class DbReviewRepository {
     private static final String SQL_SELECT_BY_ID = "SELECT * FROM \"review\" WHERE id = ?";
     private static final String SQL_INSERT_REVIEW = "INSERT INTO \"review\" (content, is_positive, user_id, film_id, useful) " +
             "VALUES (?, ?, ?, ?, 0)";
-    private static final String SQL_UPDATE_REVIEW = "UPDATE \"review\" SET content = ?, is_positive = ?, user_id = ?, " +
-            "film_id = ? WHERE id = ?"; // , useful = ?
+    private static final String SQL_UPDATE_REVIEW = "UPDATE \"review\" SET content = ?, is_positive = ? WHERE id = ?";
     private static final String SQL_UPDATE_REVIEW_USEFUL = "UPDATE \"review\" SET useful = useful + ? WHERE id = ?";
     private static final String SQL_DELETE_REVIEW = "DELETE FROM \"review\" WHERE id = ?";
 
@@ -81,12 +80,9 @@ public class DbReviewRepository {
                 SQL_UPDATE_REVIEW,
                 review.getContent(),
                 review.getIsPositive(),
-                review.getUserId(),
-                review.getFilmId(),
                 id
         );
-        Optional<Review> optReview = getReviewById(id);
-        return optReview.isPresent() ? optReview : Optional.empty();
+        return getReviewById(id);
     }
 
     public Optional<Review> getReviewById(Integer id) {
@@ -180,7 +176,7 @@ public class DbReviewRepository {
                     reviewId
             );
             return res;
-        } catch (RuntimeException ignored) {
+        } catch (EmptyResultDataAccessException ignored) {
             return false;
         }
 
@@ -195,7 +191,7 @@ public class DbReviewRepository {
                     reviewId
             );
             return res;
-        } catch (RuntimeException ignored) {
+        } catch (EmptyResultDataAccessException ignored) {
             return false;
         }
     }
