@@ -176,7 +176,7 @@ public class DbReviewRepository {
                     reviewId
             );
             return res;
-        } catch (RuntimeException ignored) {
+        } catch (EmptyResultDataAccessException ignored) {
             return false;
         }
 
@@ -191,7 +191,7 @@ public class DbReviewRepository {
                     reviewId
             );
             return res;
-        } catch (RuntimeException ignored) {
+        } catch (EmptyResultDataAccessException ignored) {
             return false;
         }
     }

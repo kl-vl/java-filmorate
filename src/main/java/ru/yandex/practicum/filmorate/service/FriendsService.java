@@ -47,7 +47,7 @@ public class FriendsService {
                 .userId(userId)
                 .entityId(friendId)
                 .build();
-        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+        eventRepository.addEvent(newEvent);
 
         return true;
     }
@@ -76,7 +76,7 @@ public class FriendsService {
                 .userId(userId)
                 .entityId(friendId)
                 .build();
-        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+        eventRepository.addEvent(newEvent);
 
         return true;
     }
