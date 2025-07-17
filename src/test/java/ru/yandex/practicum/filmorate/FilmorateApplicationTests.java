@@ -11,9 +11,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.filmorate.enums.FilmSearchBy;
 import ru.yandex.practicum.filmorate.enums.EventOperation;
 import ru.yandex.practicum.filmorate.enums.EventType;
+import ru.yandex.practicum.filmorate.enums.FilmSearchBy;
+import ru.yandex.practicum.filmorate.enums.SortOrder;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -680,7 +681,7 @@ class FilmorateApplicationTests {
     public void shouldAddToEventFeed() {
         createReviews();
         Integer userId3 = testUser3.getId();
-        List<Event> events = eventRepository.findAllByUserId(userId3,"asc");
+        List<Event> events = eventRepository.findAllByUserId(userId3, SortOrder.ASC);
 
         assertEquals(2, events.size());
 
@@ -701,7 +702,7 @@ class FilmorateApplicationTests {
                 .build();
         Optional<Event> optEvent = eventRepository.addEvent(newEvent);
 
-        events = eventRepository.findAllByUserId(userId3,"desc");
+        events = eventRepository.findAllByUserId(userId3, SortOrder.DESC);
 
         assertEquals(3, events.size());
 
@@ -721,7 +722,7 @@ class FilmorateApplicationTests {
                 .build();
         optEvent = eventRepository.addEvent(newEvent);
 
-        events = eventRepository.findAllByUserId(userId3,"desc");
+        events = eventRepository.findAllByUserId(userId3, SortOrder.DESC);
 
         assertEquals(4, events.size());
 

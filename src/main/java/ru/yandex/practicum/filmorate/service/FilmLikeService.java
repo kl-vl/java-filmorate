@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -43,7 +42,7 @@ public class FilmLikeService {
                 .userId(userId)
                 .entityId(filmId)
                 .build();
-        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+        eventRepository.addEvent(newEvent);
 
         return true;
     }
@@ -67,14 +66,14 @@ public class FilmLikeService {
                 .userId(userId)
                 .entityId(filmId)
                 .build();
-        Optional<Event> optEvent = eventRepository.addEvent(newEvent);
+        eventRepository.addEvent(newEvent);
 
         return res;
     }
 
     public List<Film> getPopularFilms(Integer count, Integer year, Integer genreId) {
-            log.info("getPopularFilms with limit: {} {} {}", count, year, genreId);
-            return filmRepository.getPopularFilms(count, year, genreId);
+        log.info("getPopularFilms with limit: {} {} {}", count, year, genreId);
+        return filmRepository.getPopularFilms(count, year, genreId);
     }
 
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {

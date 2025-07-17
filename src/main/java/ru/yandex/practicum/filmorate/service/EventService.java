@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.enums.SortOrder;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.repository.DbEventRepository;
@@ -18,11 +19,11 @@ public class EventService {
     private final UserRepository userRepository;
 
     public List<Event> getAll(Integer userId) {
-        log.debug("getAll, userId = {}", userId);
+        log.info("getAll, userId = {}", userId);
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("Юзер с id = " + userId + " не найден");
         }
-        return eventRepository.findAllByUserId(userId, "asc");
+        return eventRepository.findAllByUserId(userId, SortOrder.ASC);
 
     }
 }
