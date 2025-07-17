@@ -214,6 +214,59 @@ public class DbFilmRepository implements FilmRepository {
 
     private static final String FIND_LIKED_FILM_IDS_BY_USER = "SELECT film_id FROM \"film_like\" WHERE user_id = ?";
     private static final String COUNT_LIKES_BY_FILM_ID = "SELECT COUNT(*) FROM \"film_like\" WHERE film_id = ?";
+    private static final String SQL_FIND_BEST_NEIGHBOR = """
+        SELECT fl2.user_id AS neighbor_id
+        FROM "film_like" fl1
+        JOIN "film_like" fl2
+          ON fl1.film_id = fl2.film_id
+        WHERE fl1.user_id = ?
+          AND fl2.user_id <> ?
+        GROUP BY fl2.user_id
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+        """;
+    private static final String SQL_RECOMMEND_FROM_NEIGHBOR = """
+        SELECT
+          f.id AS film_id,
+          f.name AS film_name,
+          f.description,
+          f.release_date,
+          f.duration,
+          m.id AS mpa_id,
+          m.name AS mpa_name,
+          g.id AS genre_id,
+          g.name AS genre_name,
+          d.id AS director_id,
+          d.name AS director_name,
+          COUNT(DISTINCT fl_all.user_id) AS popularity
+        FROM "film" f
+        JOIN "film_like" fl_nei
+          ON fl_nei.film_id = f.id
+         AND fl_nei.user_id = ?
+        LEFT JOIN "film_like" fl_me
+          ON fl_me.film_id = f.id
+         AND fl_me.user_id = ?
+        LEFT JOIN "film_like" fl_all
+          ON fl_all.film_id = f.id
+        LEFT JOIN "mpa" m
+          ON m.id = f.mpa_id
+        LEFT JOIN "film_genre" fg
+          ON fg.film_id = f.id
+        LEFT JOIN "genre" g
+          ON g.id = fg.genre_id
+        LEFT JOIN "film_director" fd
+          ON fd.film_id = f.id
+        LEFT JOIN "director" d
+          ON d.id = fd.director_id
+        WHERE fl_me.user_id IS NULL
+        GROUP BY
+          f.id, f.name, f.description, f.release_date, f.duration,
+          m.id, m.name,
+          g.id, g.name,
+          d.id, d.name
+        ORDER BY popularity DESC
+        FETCH FIRST ? ROWS ONLY
+        """;
     private static final String SQL_BEST_FILMS_OF_GENRE_AND_YEAR = """
             WITH filtered_films AS (
                 SELECT DISTINCT f.id
@@ -523,5 +576,25 @@ public class DbFilmRepository implements FilmRepository {
     public int countLikesByFilmId(Integer filmId) {
         Integer cnt = jdbcTemplate.queryForObject(COUNT_LIKES_BY_FILM_ID, Integer.class, filmId);
         return cnt == null ? 0 : cnt;
+    }
+
+    public Optional<Integer> findBestNeighborId(int userId) {
+        List<Integer> list = jdbcTemplate.queryForList(
+                SQL_FIND_BEST_NEIGHBOR,
+                Integer.class,
+                userId,
+                userId
+        );
+        return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+    }
+
+    public List<Film> recommendFromNeighbor(int userId, int neighborId, int limit) {
+        return jdbcTemplate.query(
+                SQL_RECOMMEND_FROM_NEIGHBOR,
+                filmRowMapper,
+                neighborId,
+                userId,
+                limit
+        );
     }
 }
