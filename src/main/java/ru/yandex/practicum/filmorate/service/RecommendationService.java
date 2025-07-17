@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.DbFilmRepository;
+import java.util.Collections;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RecommendationService {
@@ -19,16 +21,13 @@ public class RecommendationService {
 
     public List<Film> recommendFor(int userId) {
         userService.getUserById(userId);
-
         Optional<Integer> neighborOpt = dbFilmRepository.findBestNeighborId(userId);
         if (neighborOpt.isEmpty()) {
             return Collections.emptyList();
         }
-
-        return dbFilmRepository.recommendFromNeighbor(
-                userId,
-                neighborOpt.get(),
-                10
-        );
+        List<Film> raw = dbFilmRepository.recommendFromNeighbor(userId, neighborOpt.get(), 1);
+        return raw.stream()
+                .map(r -> dbFilmRepository.getById(r.getId()).orElse(r))
+                .collect(Collectors.toList());
     }
 }
