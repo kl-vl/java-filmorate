@@ -86,10 +86,11 @@ public class FilmService {
             throw new FilmValidationException("ID фильма должно быть указано");
         }
 
-        if (!filmRepository.removeFilmById(filmId)) {
+        boolean filmRemove = filmRepository.removeFilmById(filmId);
+
+        if (!filmRemove) {
             throw new FilmNotFoundException("Фильм с id { " + filmId + " } - не найден");
         }
-        filmRepository.removeFilmById(filmId);
 
         log.info("Удаление фильма с ID: {} прошло успешно", filmId);
     }
